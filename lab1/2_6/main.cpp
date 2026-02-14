@@ -1,150 +1,137 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <climits>
+#include <stdexcept>
+#include <cctype>
 
 int CharToDigit(char c)
 {
-	if (c >= '0' && c <= '9')
-		return c - '0';
-	if (c >= 'A' && c <= 'Z')
-		return c - 'A' + 10;
-	return -1;
+	c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'A' && c <= 'Z')
+        return c - 'A' + 10;
+    throw std::invalid_argument("Invalid character in number");
 }
 
 char DigitToChar(int digit)
 {
-	if (digit >= 0 && digit <= 9)
-		return static_cast<char>('0' + digit);
-	if (digit >= 10 && digit <= 35)
-		return static_cast<char>('A' + digit - 10);
-	return '?';
+    if (digit >= 0 && digit <= 9)
+        return static_cast<char>('0' + digit);
+    if (digit >= 10 && digit <= 35)
+        return static_cast<char>('A' + digit - 10);
+    throw std::invalid_argument("Invalid digit for conversion");
 }
 
-int StringToInt(std::string str, const int radix, bool& wasError)
+int StringToInt(const std::string& convertible, const int radix)
 {
-	if (radix < 2 || radix > 36 || str.empty())
+    if (radix < 2 || radix > 36)
+        throw std::invalid_argument("Radix must be between 2 and 36");
+
+    if (convertible.empty())
+        throw std::invalid_argument("Empty string");
+
+    int sign = 1;
+    size_t startPos = 0;
+
+    if (convertible[0] == '-')
+    {
+        sign = -1;
+        startPos = 1;
+
+        if (convertible.length() == 1)
+            throw std::invalid_argument("Missing digits after minus sign");
+    }
+
+    int result = 0;
+    int power = 1;
+
+	for (size_t i = convertible.length(); i > startPos; )
 	{
-		wasError = true;
-		return 0;
-	}
+		--i;
 
-	int sign = 1;
-	if (str[0] == '-')
-	{
-		sign = -1;
-		str.erase(str.begin());
-
-		if (str.empty())
-		{
-			wasError = true;
-			return 0;
-		}
-	}
-
-	int result = 0;
-	int power = 1;
-
-	while (!str.empty())
-	{
-		const int digit = CharToDigit(str.back());
+		const int digit = CharToDigit(convertible[i]);
 
 		if (digit >= radix)
-		{
-			wasError = true;
-			return 0;
-		}
+			throw std::invalid_argument("Digit exceeds radix");
 
 		if (digit != 0 && power > (INT_MAX - result) / digit)
-		{
-			wasError = true;
-			return 0;
-		}
+			throw std::overflow_error("Integer overflow");
+
 		result += digit * power;
 
-		if (!str.empty() && power > INT_MAX / radix)
-		{
-			wasError = true;
-			return 0;
-		}
+		if (i > startPos && power > INT_MAX / radix)
+			throw std::overflow_error("Integer overflow");
 
-		power *= radix;
-		str.pop_back();
+		if (i > startPos)
+			power *= radix;
 	}
 
-	return result * sign;
+    return result * sign;
 }
 
-std::string IntToString(int decNumber, int to, bool &wasError)
+std::string IntToString(int decNumber, int radix)
 {
-	std::vector<int> result;
-	std::string answer;
+    if (radix < 2 || radix > 36)
+        throw std::invalid_argument("Radix must be between 2 and 36");
 
-	std::string sign = "";
-	if (decNumber < 0)
-	{
-		sign = "-";
-		decNumber *= -1;
-	}
+    if (decNumber == 0)
+        return "0";
 
-	while (decNumber > 0)
-	{
-		result.push_back(decNumber % to);
-		//обработка ошибок
-		decNumber /= to;
-	}
+    std::vector<int> digits;
+    std::string result;
+    unsigned int number = (decNumber < 0) ? -decNumber : decNumber;
 
-	if (result.empty())
-	{
-		result.push_back(0);
-	}
+    while (number > 0)
+    {
+        digits.push_back(number % radix);
+        number /= radix;
+    }
 
-	answer += sign;
-	for (int i = result.size() - 1; i >= 0; --i)
-	{
-		auto digit = DigitToChar(result[i]);
-		if (digit != '?') answer += digit;
-		else
-		{
-			wasError = true;
-			return "";
-		}
-	}
+    if (decNumber < 0)
+        result += '-';
 
+    for (int i = static_cast<int>(digits.size()) - 1; i >= 0; --i)
+    {
+        result += DigitToChar(digits[i]);
+    }
 
-	return answer;
+    return result;
 }
 
 int main(int argc, char* argv[])
 {
-	if (argc != 4) {
-		std::cerr << "Usage: radix.exe <from> <to> <value>\n";
-		return 1;
-	}
+    try
+    {
+        if (argc != 4) {
+            std::cerr << "Usage: radix <from> <to> <value>\n";
+            return 1;
+        }
 
-	bool wasError = false;
+        int from = StringToInt(argv[1], 10);
+        int to = StringToInt(argv[2], 10);
+        int value = StringToInt(argv[3], from);
 
-	int from = StringToInt(argv[1], 10, wasError);
-	if (wasError) {
-		std::cerr << "Invalid source radix\n";
-		return 1;
-	}
+        std::string answer = IntToString(value, to);
+    	std::cout << answer << '\n';
 
-	int to = StringToInt(argv[2], 10, wasError);
-	if (wasError) {
-		std::cerr << "Invalid destination radix\n";
-		return 1;
-	}
-
-	int value = StringToInt(argv[3], from, wasError);
-	if (wasError) {
-		std::cerr << "Invalid input value\n";
-		return 1;
-	}
-
-	std::string answer = IntToString(value, to, wasError);
-	if (wasError) {
-		std::cerr << "Conversion error\n";
-		return 1;
-	}
-
-	std::cout << answer << '\n';
-	return 0;
+        return 0;
+    }
+    catch (const std::invalid_argument& exception)
+    {
+        std::cerr << "Invalid argument: " << exception.what() << '\n';
+        return 1;
+    }
+    catch (const std::overflow_error& exception)
+    {
+        std::cerr << "Overflow error: " << exception.what() << '\n';
+        return 1;
+    }
+    catch (const std::exception& exception)
+    {
+        std::cerr << "Error: " << exception.what() << '\n';
+        return 1;
+    }
 }
