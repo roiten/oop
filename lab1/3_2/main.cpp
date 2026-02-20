@@ -1,14 +1,27 @@
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-void readFile(std::ifstream& inputFile, double matrix[3][3])
+void ReadFile(std::ifstream& inputFile, std::array<std::array<double, 3>, 3>& matrix)
 {
 	for (int rowIndex = 0; rowIndex < 3; rowIndex++)
 	{
 		std::string line;
 		std::getline(inputFile, line);
+
+		int delimCount = 0;
+		for (const char c : line)
+		{
+			if (c == '\t' || c == ' ')
+				delimCount++;
+		}
+
+		if (delimCount != 2)
+		{
+			throw std::exception("Invalid matrix format");
+		}
 
 		std::istringstream lineStream(line);
 
@@ -16,13 +29,12 @@ void readFile(std::ifstream& inputFile, double matrix[3][3])
 		{
 			double value;
 			lineStream >> value;
-			matrix[rowIndex][columnIndex] = value;
+			matrix.at(rowIndex).at(columnIndex) = value;
 		}
 	}
 }
 
-//используем ссылки на вектора
-double getMinorDeterminant(double matrix[3][3], int row, int column)
+double GetMinorDeterminant(const std::array<std::array<double, 3>, 3>& matrix, const int row, const int column)
 {
 	double subMatrix[2][2];
 	int subRowIndex = 0;
@@ -51,7 +63,7 @@ double getMinorDeterminant(double matrix[3][3], int row, int column)
 		- subMatrix[0][1] * subMatrix[1][0];
 }
 
-double getDeterminant(double matrix[3][3])
+double GetDeterminant(const std::array<std::array<double, 3>, 3>& matrix)
 {
 	double determinant = 0.0;
 
@@ -59,16 +71,15 @@ double getDeterminant(double matrix[3][3])
 	{
 		double cofSign = (columnIndex % 2 == 0) ? 1.0 : -1.0;
 
-		determinant += cofSign * matrix[0][columnIndex] * getMinorDeterminant(matrix, 0, columnIndex);
+		determinant += cofSign * matrix[0][columnIndex] * GetMinorDeterminant(matrix, 0, columnIndex);
 	}
 
 	return determinant;
 }
 
-bool inverse(double matrix[3][3], double inverseMatrix[3][3])
-//выбрасываем исклчение при несуществующей матрице
+bool Inverse(const std::array<std::array<double, 3>, 3>& matrix, std::array<std::array<double, 3>, 3>& inverseMatrix)
 {
-	double determinant = getDeterminant(matrix);
+	const double determinant = GetDeterminant(matrix);
 
 	if (determinant == 0.0)
 		return false;
@@ -79,7 +90,7 @@ bool inverse(double matrix[3][3], double inverseMatrix[3][3])
 		{
 			double cofSign = ((rowIndex + columnIndex) % 2 == 0) ? 1.0 : -1.0;
 
-			inverseMatrix[columnIndex][rowIndex] = cofSign * getMinorDeterminant(matrix, rowIndex, columnIndex)
+			inverseMatrix[columnIndex][rowIndex] = cofSign * GetMinorDeterminant(matrix, rowIndex, columnIndex)
 				/ determinant;
 		}
 	}
@@ -87,7 +98,7 @@ bool inverse(double matrix[3][3], double inverseMatrix[3][3])
 	return true;
 }
 
-void drawMatrix(double matrix[3][3])
+void DrawMatrix(const std::array<std::array<double, 3>, 3>& matrix)
 {
 	std::cout.precision(3);
 
@@ -103,31 +114,44 @@ void drawMatrix(double matrix[3][3])
 	std::cout << std::endl;
 }
 
-//Coding conventions соблюдать
+// Coding conventions соблюдать
 int main(int argc, char* argv[])
 {
 	try
 	{
-		double matrix[3][3];
-		double inverseMatrix[3][3];
+		std::array<std::array<double, 3>, 3> matrix{};
+		std::array<std::array<double, 3>, 3> inverseMatrix{};
 
 		if (argc < 2)
 		{
-			std::cout << "Input first row: ";
-			std::cin >> matrix[0][0] >> matrix[0][1] >> matrix[0][2];
-			std::cout << "Input second row: ";
-			std::cin >> matrix[1][0] >> matrix[1][1] >> matrix[1][2];
-			std::cout << "Input third row: ";
-			std::cin >> matrix[2][0] >> matrix[2][1] >> matrix[2][2];
+			std::string line;
 
-			// если матрица не 3 на 3 - ошибка "Invalid matrix format"
-			// если там строки то "Invalid matrix"
+			for (int rowIndex = 0; rowIndex < 3; rowIndex++)
+			{
+				std::cout << "Input row " << (rowIndex + 1) << ": ";
+				std::getline(std::cin, line);
+
+				int delimCount = 0;
+				for (char c : line)
+				{
+					if (c == '\t' || c == ' ')
+						delimCount++;
+				}
+
+				if (delimCount != 2)
+				{
+					throw std::runtime_error("Invalid matrix format");
+				}
+
+				std::istringstream lineStream(line);
+				lineStream >> matrix[rowIndex][0] >> matrix[rowIndex][1] >> matrix[rowIndex][2];
+			}
 		}
 
 		else if (argc == 2)
 		{
 
-			if (argv[1] == "-h")
+			if (std::string(argv[1]) == "-h")
 			{
 				std::cout << "Use this file to find inversed matrix" << std::endl;
 				std::cout << "Using <./inverse> <matrix_file.txt>" << std::endl;
@@ -141,7 +165,7 @@ int main(int argc, char* argv[])
 				throw std::exception("Cannot open file");
 			}
 
-			readFile(inputFile, matrix);
+			ReadFile(inputFile, matrix);
 		}
 
 		else
@@ -150,7 +174,7 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 
-		if (!inverse(matrix, inverseMatrix))
+		if (!Inverse(matrix, inverseMatrix))
 		{
 			std::cerr << "Non-invertible\n";
 			return 0;
@@ -159,7 +183,7 @@ int main(int argc, char* argv[])
 		std::cout << "\n"
 				  << "Answer:" << std::endl;
 
-		drawMatrix(inverseMatrix);
+		DrawMatrix(inverseMatrix);
 
 		return 0;
 	}
