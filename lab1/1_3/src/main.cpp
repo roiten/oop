@@ -8,6 +8,9 @@ bool checkSubstringContainsInLine(const std::string& input, const std::string& s
 	return pos != std::string::npos;
 }
 
+
+//vector
+//тестов больше
 int findString(std::ifstream& input, const std::string& desiredString)
 {
 	std::string line;
@@ -26,7 +29,6 @@ int findString(std::ifstream& input, const std::string& desiredString)
 
 	if (!isStringFound)
 	{
-		std::cout << "Text not found" << std::endl;
 		return 1;
 	}
 
@@ -48,5 +50,16 @@ int main(const int argc, char* argv[])
 		return 2;
 	}
 
-	return findString(input, argv[2]);
+	const int foundedLine = findString(input, argv[2]);
+
+	if (foundedLine == 1)
+	{
+		std::cout << "Text not found" << std::endl;
+		return 1;
+	}
+
+	std::cout << foundedLine << std::endl;
+	return 0;
+
+
 }

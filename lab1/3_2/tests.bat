@@ -1,18 +1,13 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set EXE=radix.exe
+set EXE=inverse.exe
 set FAIL=0
 
 echo Running tests for %EXE%
 
-call :test_basic_conversion
-call :test_negative
-call :test_zero
-call :test_invalid_char
-call :test_invalid_radix
-call :test_overflow
-call :test_wrong_args
+call :test_null_det
+
 
 if %FAIL%==0 (
     echo ALL TESTS PASSED
@@ -21,12 +16,11 @@ if %FAIL%==0 (
 )
 exit /b %FAIL%
 
-:test_basic_conversion
-echo conversion 1011 -> base 10
-%EXE% 2 10 1011 > out.txt
-for /f %%a in (out.txt) do set result=%%a
-if "!result!" neq "11" (
-    echo FAIL: expected 11, got !result!
+:test_null_det
+echo test matrix with null det
+%EXE% null_det.txt > out.txt 2>&1
+findstr /c:"Non-invertible" out.txt >nul || (
+    echo FAIL: expected do not exist message
     set /a FAIL+=1
 )
 goto :eof

@@ -51,11 +51,11 @@ void Decompress(const std::string& inputPath,
 	if (!input)
 	{
 		std::cerr << "Cannot open input file: " << inputPath << std::endl;
-		throw std::runtime_error("Cannot open input file");
+		throw std::exception("Cannot open input file");
 	}
 	std::ofstream output(outputPath, std::ios::binary);
 	if (!output)
-		throw std::runtime_error("Cannot open output file");
+		throw std::exception("Cannot open output file");
 
 	char countByte;
 	char value;
@@ -63,12 +63,12 @@ void Decompress(const std::string& inputPath,
 	while (input.get(countByte))
 	{
 		if (!input.get(value))
-			throw std::runtime_error("Corrupted file");
+			throw std::exception("Corrupted file");
 
 		auto count = static_cast<unsigned char>(countByte);
 
 		if (count == 0)
-			throw std::runtime_error("Invalid repeat count");
+			throw std::exception("Invalid repeat count");
 
 		for (size_t i = 0; i < count; ++i)
 			output.put(value);

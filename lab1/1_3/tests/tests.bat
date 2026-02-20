@@ -110,11 +110,3 @@ if %errorlevel% neq 3 (
     )
 )
 goto :eof
-
-@REM :test_onegin
-@REM echo Test 7: Empty search string
-@REM %EXE% evgeniy-onegin.txt "Я к Вам пишу" > out.txt
-@REM if %errorlevel% equ 0 (
-@REM     echo WARNING: decide how empty search is handled
-@REM )
-goto :eof

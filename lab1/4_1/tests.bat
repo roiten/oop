@@ -1,8 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
 
-echo Running RLE tests...
-
 set EXE=rle.exe
 
 %EXE% pack empty.bin output_empty.rle

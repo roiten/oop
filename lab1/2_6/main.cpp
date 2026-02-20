@@ -48,10 +48,10 @@ int StringToInt(const std::string& convertible, const int radix)
     int result = 0;
     int power = 1;
 
-	for (size_t i = convertible.length(); i > startPos; )
-	{
-		--i;
+	//проверка на сам intmax и intmin
 
+	for (size_t i = convertible.length() -1; i >= startPos; --i)
+	{
 		const int digit = CharToDigit(convertible[i]);
 
 		if (digit >= radix)
@@ -76,6 +76,7 @@ std::string IntToString(int decNumber, int radix)
 {
     if (radix < 2 || radix > 36)
         throw std::invalid_argument("Radix must be between 2 and 36");
+	//и в константы и в отдельную фцию валидации
 
     if (decNumber == 0)
         return "0";
