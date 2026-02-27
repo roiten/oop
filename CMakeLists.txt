@@ -12,3 +12,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(catch2)
 
 add_subdirectory(lab1)
+add_subdirectory(lab2)
