@@ -7,10 +7,8 @@ set FAIL=0
 echo Running tests for %EXE%
 echo ================================
 
-:: Создаем тестовые файлы
 call :create_test_files
 
-:: Запускаем тесты
 call :test_normal_matrix1
 call :test_normal_matrix2
 call :test_null_det
@@ -26,7 +24,6 @@ call :test_stdin_valid
 call :test_stdin_invalid_format
 call :test_stdin_invalid_value
 
-:: Удаляем тестовые файлы
 call :cleanup
 
 echo ================================
@@ -38,47 +35,38 @@ if %FAIL%==0 (
 exit /b %FAIL%
 
 :create_test_files
-:: Нормальная матрица 1 (из примера 1)
-echo 1	2	3 > matrix1.txt
-echo 0	1	4 >> matrix1.txt
-echo 5	6	0 >> matrix1.txt
+echo "1  2  3" > matrix1.txt
+echo "0	1  4" >> matrix1.txt
+echo "5	6  0" >> matrix1.txt
 
-:: Нормальная матрица 2 (из примера 2)
 echo 4	7	2.3 > matrix2.txt
 echo 2	1	1 >> matrix2.txt
 echo 3	-2	-2.31 >> matrix2.txt
 
-:: Вырожденная матрица (из примера 3)
 echo 1	2	3 > null_det.txt
 echo 2	4	6 >> null_det.txt
 echo 1	2	3 >> null_det.txt
 
-:: Матрица с нечисловым значением (из примера 4)
 echo 1	2	a > invalid_char.txt
 echo 2	4	6 >> invalid_char.txt
 echo 1	2	3 >> invalid_char.txt
 
-:: Матрица с неправильным форматом (пробелы вместо табов)
 echo 1 2 3 > format_spaces.txt
 echo 0 1 4 >> format_spaces.txt
 echo 5 6 0 >> format_spaces.txt
 
-:: Матрица с неправильным форматом (лишний таб)
 echo 1	2	3	 > format_extra_tab.txt
 echo 0	1	4	>> format_extra_tab.txt
 echo 5	6	0	>> format_extra_tab.txt
 
-:: Матрица с неправильным форматом (не хватает чисел)
 echo 1	2 > format_few.txt
 echo 0	1	4 >> format_few.txt
 echo 5	6	0 >> format_few.txt
 
-:: Матрица с неправильным форматом (пустая строка)
 echo 1	2	3 > format_empty.txt
 echo. >> format_empty.txt
 echo 5	6	0 >> format_empty.txt
 
-:: Пустой файл
 type nul > empty.txt
 goto :eof
 

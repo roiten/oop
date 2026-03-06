@@ -26,7 +26,7 @@ void Compress(const std::string& inputPath,
 
 	while (input.get(next))
 	{
-		if (next == current && count < 255)
+		if (next == current && count < 255) //в константу
 		{
 			count++;
 		}
@@ -77,10 +77,9 @@ void Decompress(const std::string& inputPath,
 
 int main(int argc, char* argv[])
 {
+	//описать редими работы enum
 	try
 	{
-		generateFiles();
-
 		if (argc != 4)
 			throw std::runtime_error(
 				"Usage: rle pack/unpack <input> <output>");

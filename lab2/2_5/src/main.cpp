@@ -1,11 +1,15 @@
+#include "Decoder.h"
 #include <iostream>
-#include "decoder.h"
 
 int main()
 {
 	try
 	{
-		HtmlDecodeAndPrint(std::cin, std::cout);
+		std::string line;
+		while (std::getline(std::cin, line))
+		{
+			std::cout << HtmlDecode(line) << std::endl;
+		}
 	}
 	catch (const std::exception& errorMessage)
 	{

@@ -1,7 +1,7 @@
-#include "decoder.h"
-#include <unordered_map>
-#include <string_view>
+#include "Decoder.h"
 #include <iostream>
+#include <string_view>
+#include <unordered_map>
 
 const std::unordered_map<std::string_view, char> HTML_DECODE_MAP = {
 	{ "&quot;", '"' },
@@ -10,15 +10,6 @@ const std::unordered_map<std::string_view, char> HTML_DECODE_MAP = {
 	{ "&gt;",   '>' },
 	{ "&amp;",  '&' }
 };
-
-void HtmlDecodeAndPrint(std::istream& input, std::ostream& output)
-{
-	std::string line;
-	while (std::getline(input, line))
-	{
-		output << HtmlDecode(line) << '\n';
-	}
-}
 
 std::string HtmlDecode(const std::string& text)
 {
@@ -42,9 +33,9 @@ std::string HtmlDecode(const std::string& text)
 
 		std::string_view entity(&text[i], semicolonPos - i + 1);
 
-		if (auto it = HTML_DECODE_MAP.find(entity); it != HTML_DECODE_MAP.end())
+		if (auto founded = HTML_DECODE_MAP.find(entity); founded != HTML_DECODE_MAP.end())
 		{
-			result += it->second;
+			result += founded->second;
 			i = semicolonPos;
 		}
 		else

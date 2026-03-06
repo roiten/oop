@@ -4,6 +4,33 @@
 #include <sstream>
 #include <string>
 
+//алиасинг для типа array<arrat - matrix
+
+// строку получает через гетлайн и превращаем в поток
+
+int CountDelimiters(const std::string& line)
+{
+	int cnt = 0;
+	bool prevWasSpace = false;
+
+	for (size_t i = 0; i < line.size(); ++i)
+	{
+		if (isspace(line[i]))
+		{
+			if (!prevWasSpace)
+			{
+				cnt++;
+				prevWasSpace = true;
+			}
+		}
+		else
+		{
+			prevWasSpace = false;
+		}
+	}
+	return cnt;
+}
+
 void ReadFile(std::ifstream& inputFile, std::array<std::array<double, 3>, 3>& matrix)
 {
 	for (int rowIndex = 0; rowIndex < 3; rowIndex++)
@@ -11,12 +38,7 @@ void ReadFile(std::ifstream& inputFile, std::array<std::array<double, 3>, 3>& ma
 		std::string line;
 		std::getline(inputFile, line);
 
-		int delimCount = 0;
-		for (const char c : line)
-		{
-			if (c == '\t' || c == ' ')
-				delimCount++;
-		}
+		int delimCount = CountDelimiters(line);
 
 		if (delimCount != 2)
 		{
@@ -81,6 +103,7 @@ bool Inverse(const std::array<std::array<double, 3>, 3>& matrix, std::array<std:
 {
 	const double determinant = GetDeterminant(matrix);
 
+	//epsilon использовать
 	if (determinant == 0.0)
 		return false;
 
@@ -100,6 +123,7 @@ bool Inverse(const std::array<std::array<double, 3>, 3>& matrix, std::array<std:
 
 void DrawMatrix(const std::array<std::array<double, 3>, 3>& matrix)
 {
+	std::cout << std::fixed;
 	std::cout.precision(3);
 
 	for (int rowIndex = 0; rowIndex < 3; rowIndex++)
@@ -114,14 +138,13 @@ void DrawMatrix(const std::array<std::array<double, 3>, 3>& matrix)
 	std::cout << std::endl;
 }
 
-// Coding conventions соблюдать
 int main(int argc, char* argv[])
 {
 	try
 	{
 		std::array<std::array<double, 3>, 3> matrix{};
 		std::array<std::array<double, 3>, 3> inverseMatrix{};
-
+		//разбить main посильнее
 		if (argc < 2)
 		{
 			std::string line;
@@ -131,16 +154,11 @@ int main(int argc, char* argv[])
 				std::cout << "Input row " << (rowIndex + 1) << ": ";
 				std::getline(std::cin, line);
 
-				int delimCount = 0;
-				for (char c : line)
-				{
-					if (c == '\t' || c == ' ')
-						delimCount++;
-				}
+				int delimCount = CountDelimiters(line);
 
 				if (delimCount != 2)
 				{
-					throw std::runtime_error("Invalid matrix format");
+					throw std::exception("Invalid matrix format");
 				}
 
 				std::istringstream lineStream(line);
@@ -153,7 +171,7 @@ int main(int argc, char* argv[])
 
 			if (std::string(argv[1]) == "-h")
 			{
-				std::cout << "Use this file to find inversed matrix" << std::endl;
+				std::cout << "Use this package to find inversed matrix" << std::endl;
 				std::cout << "Using <./inverse> <matrix_file.txt>" << std::endl;
 				return 0;
 			}
