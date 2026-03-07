@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <codecvt>
 #include <cwctype>
 #include <locale>
@@ -23,10 +24,7 @@ inline std::string NormalizeText(const std::string& input)
 	std::wstring wstr = converter.from_bytes(Trim(input));
 
 	//transform
-	for (wchar_t& ch : wstr)
-	{
-		ch = std::towlower(ch);
-	}
+	std::ranges::transform(wstr, wstr.begin(), ::tolower);
 
 	return converter.to_bytes(wstr);
 }

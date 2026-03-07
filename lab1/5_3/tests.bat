@@ -1,42 +1,109 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set EXE=rle.exe
+set PASS=0
+set FAIL=0
+set EXE=fill.exe
 
-%EXE% pack empty.bin output_empty.rle
-fc /b output_empty.rle expected_pack_empty.bin
-if %errorlevel% neq 0 echo Test 1 Pack Failed & goto :end
-%EXE% unpack output_empty.rle output_empty_unpacked.bin
-fc /b output_empty_unpacked.bin empty.bin
-if %errorlevel% neq 0 echo Test 1 Unpack Failed & goto :end
+echo Simple fill (closed contour)
+%EXE% test1_input.txt test1_actual.txt
+fc /b test1_actual.txt test1_expected.txt >nul 2>&1
+if %errorlevel%==0 (
+    echo   PASSED
+    set /a PASS+=1
+) else (
+    echo   FAILED
+    echo   --- Expected ---
+    type test1_expected.txt
+    echo   --- Actual ---
+    type test1_actual.txt
+    set /a FAIL+=1
+)
+echo.
 
-%EXE% pack 255.bin output_255.rle
-fc /b output_255.rle expected_pack_255.bin
-if %errorlevel% neq 0 echo Test 2 Pack Failed & goto :end
-%EXE% unpack output_255.rle output_255_unpacked.bin
-fc /b output_255_unpacked.bin 255.bin
-if %errorlevel% neq 0 echo Test 2 Unpack Failed & goto :end
+echo Multiple territories
+%EXE% test2_input.txt test2_actual.txt
+fc /b test2_actual.txt test2_expected.txt >nul 2>&1
+if %errorlevel%==0 (
+    echo   PASSED
+    set /a PASS+=1
+) else (
+    echo   FAILED
+    fc test2_actual.txt test2_expected.txt | more /p /c /e +1 /l 20
+    set /a FAIL+=1
+)
+echo.
 
-%EXE% pack 256.bin output_256.rle
-fc /b output_256.rle expected_pack_256.bin
-if %errorlevel% neq 0 echo Test 3 Pack Failed & goto :end
-%EXE% unpack output_256.rle output_256_unpacked.bin
-fc /b output_256_unpacked.bin 256.bin
-if %errorlevel% neq 0 echo Test 3 Unpack Failed & goto :end
+echo Fill leaks through open contour
+%EXE% test3_input.txt test3_actual.txt
+fc /b test3_actual.txt test3_expected.txt >nul 2>&1
+if %errorlevel%==0 (
+    echo   PASSED
+    set /a PASS+=1
+) else (
+    echo   FAILED
+    set /a FAIL+=1
+)
+echo.
 
-%EXE% pack 257.bin output_257.rle
-fc /b output_257.rle expected_pack_257.bin
-if %errorlevel% neq 0 echo Test 4 Pack Failed & goto :end
-%EXE% unpack output_257.rle output_257_unpacked.bin
-fc /b output_257_unpacked.bin 257.bin
-if %errorlevel% neq 0 echo Test 4 Unpack Failed & goto :end
+echo No start point (image must be unchanged)
+%EXE% test4_input.txt test4_actual.txt
+fc /b test4_actual.txt test4_expected.txt >nul 2>&1
+if %errorlevel%==0 (
+    echo   PASSED
+    set /a PASS+=1
+) else (
+    echo   FAILED
+    set /a FAIL+=1
+)
+echo.
 
-%EXE% pack 255char.bin output_255char.rle
-fc /b output_255char.rle expected_pack_255char.bin
-if %errorlevel% neq 0 echo Test 5 Pack Failed & goto :end
-%EXE% unpack output_255char.rle output_255char_unpacked.bin
-fc /b output_255char_unpacked.bin 255char.bin
-if %errorlevel% neq 0 echo Test 5 Unpack Failed & goto :end
+echo Help flag (-h)
+%EXE% -h >nul 2>&1
+if %errorlevel%==0 (
+    echo   PASSED
+    set /a PASS+=1
+) else (
+    echo   FAILED - exit code was not 0
+    set /a FAIL+=1
+)
+echo.
 
-echo All tests passed!
+echo Invalid arguments (too many args)
+%EXE% a b c > test7_actual.txt 2>&1
+set ERR_CODE=%errorlevel%
+findstr /c:"ERROR" test7_actual.txt >nul 2>&1
+if %errorlevel%==0 (
+    if %ERR_CODE%==1 (
+        echo   PASSED
+        set /a PASS+=1
+    ) else (
+        echo   FAILED - exit code was %ERR_CODE%, expected 1
+        set /a FAIL+=1
+    )
+) else (
+    echo   FAILED - no ERROR in output
+    set /a FAIL+=1
+)
+echo.
+
+echo Missing input file
+%EXE% nonexistent_file.txt out.txt > test8_actual.txt 2>&1
+set ERR_CODE=%errorlevel%
+findstr /c:"ERROR" test8_actual.txt >nul 2>&1
+if %errorlevel%==0 (
+    if %ERR_CODE%==1 (
+        echo   PASSED
+        set /a PASS+=1
+    ) else (
+        echo   FAILED - exit code was %ERR_CODE%, expected 1
+        set /a FAIL+=1
+    )
+) else (
+    echo   FAILED - no ERROR in output
+    set /a FAIL+=1
+)
+echo.
+
+echo  Results: %PASS% passed, %FAIL% failed
 :end

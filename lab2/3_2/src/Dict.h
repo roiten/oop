@@ -11,7 +11,7 @@ ListWords FindTranslation(const Dictionary& dictionary, const std::string& word)
 
 void SaveDictionary(const std::string& fileName, const Dictionary& dictionary);
 
-void AddWordPair(Dictionary& dictionary, //AddTranslation
+void AddTranslation(Dictionary& dictionary, //AddTranslation
 	const std::string& word,
 	const std::string& translationLine);
 

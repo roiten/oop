@@ -13,7 +13,7 @@ int main()
 	}
 	catch (const std::exception& errorMessage)
 	{
-		std::cout << errorMessage.what() << '\n';
+		std::cout << errorMessage.what() << std::endl;
 		return 1;
 	}
 	return 0;

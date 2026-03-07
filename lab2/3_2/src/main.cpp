@@ -72,7 +72,7 @@ void RunDictionary(Dictionary& dictionary, const std::string& fileName)
 
 			if (!translationLine.empty())
 			{
-				AddWordPair(dictionary, NormalizeText(input), translationLine);
+				AddTranslation(dictionary, NormalizeText(input), translationLine);
 				std::cout << "Слово сохранено.\n";
 				modified = true;
 			}

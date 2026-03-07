@@ -29,40 +29,61 @@ void PrintHelp();
 void ProcessFiles(const std::string& inputFilePath, const std::string& outputFilePath);
 void ProcessConsole();
 void LoadImage(std::istream& input, std::vector<std::string>& image);
-void FindStartPoints(const std::vector<std::string>& image, std::stack<Point>& startPoints);
+void FindStartPoints(const std::vector<std::string>& image, std::vector<Point>& startPoints);
 bool IsValidPoint(int row, int col, int rows, int cols);
 bool IsBoundary(char ch);
 void FloodFill(std::vector<std::string>& image, int startRow, int startCol);
 void ProcessImage(std::vector<std::string>& image);
 void SaveImage(std::ostream& output, const std::vector<std::string>& image);
 
+bool g_isFileMode = false;
+
 int main(const int argc, char* argv[])
 {
+	std::string inputFilePath, outputFilePath;
+	Mode mode;
+
 	try
 	{
-		std::string inputFilePath, outputFilePath;
-		switch (ParseArguments(argc, argv, inputFilePath, outputFilePath))
-		{
-		case Mode::Help:
-			PrintHelp();
-			return 0;
-
-		case Mode::File:
-			ProcessFiles(inputFilePath, outputFilePath);
-			break;
-
-		case Mode::Stdin:
-			ProcessConsole();
-			break;
-		}
-
-		return 0;
+		mode = ParseArguments(argc, argv, inputFilePath, outputFilePath);
 	}
-	catch (const std::exception& e)
+	catch (...)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << "ERROR" << std::endl;
 		return 1;
 	}
+
+	if (mode == Mode::Help)
+	{
+		PrintHelp();
+		return 0;
+	}
+
+	if (mode == Mode::File)
+	{
+		g_isFileMode = true;
+		try
+		{
+			ProcessFiles(inputFilePath, outputFilePath);
+		}
+		catch (...)
+		{
+			std::cout << "ERROR" << std::endl;
+			return 1;
+		}
+		return 0;
+	}
+
+	try
+	{
+		ProcessConsole();
+	}
+	catch (...)
+	{
+		std::cout << "ERROR" << std::endl;
+		return 0;
+	}
+	return 0;
 }
 
 Mode ParseArguments(int argc, char* argv[], std::string& inputFile, std::string& outputFile)
@@ -82,7 +103,7 @@ Mode ParseArguments(int argc, char* argv[], std::string& inputFile, std::string&
 		return Mode::Stdin;
 	}
 
-	throw std::exception("ERROR. Invalid arguments");
+	throw std::runtime_error("ERROR");
 }
 
 void PrintHelp()
@@ -91,7 +112,7 @@ void PrintHelp()
 			  << "Использование:\n"
 			  << "Максимальный размер изображения: " << MAX_IMAGE_SIZE << "x" << MAX_IMAGE_SIZE << "\n"
 			  << "fill.exe <input file> <output file> - обработка файлов\n"
-			  << "fill.exe - ввод через консоль\n"
+			  << "fill.exe - ввод через stdin\n"
 			  << "fill.exe -h - показать справку\n"
 			  << "Символ 'O' (англ.) - точки начала заливки\n"
 			  << "Символ '#' - границы контуров\n"
@@ -104,13 +125,13 @@ void ProcessFiles(const std::string& inputFilePath, const std::string& outputFil
 	std::ifstream inputFile(inputFilePath);
 	if (!inputFile.is_open())
 	{
-		throw std::exception("ERROR. Cannot open input file");
+		throw std::runtime_error("ERROR");
 	}
 
 	std::ofstream outputFile(outputFilePath);
 	if (!outputFile.is_open())
 	{
-		throw std::exception("ERROR. Cannot open output file");
+		throw std::runtime_error("ERROR");
 	}
 
 	std::vector<std::string> image;
@@ -124,7 +145,6 @@ void ProcessConsole()
 	std::vector<std::string> image;
 	LoadImage(std::cin, image);
 	ProcessImage(image);
-	std::cout << "Result:" << std::endl;
 	SaveImage(std::cout, image);
 }
 
@@ -135,7 +155,7 @@ void LoadImage(std::istream& input, std::vector<std::string>& image)
 
 	while (std::getline(input, line) && rowCount < MAX_IMAGE_SIZE)
 	{
-		if (line.length() > MAX_IMAGE_SIZE)
+		if ((int)line.length() > MAX_IMAGE_SIZE)
 		{
 			line = line.substr(0, MAX_IMAGE_SIZE);
 		}
@@ -145,15 +165,15 @@ void LoadImage(std::istream& input, std::vector<std::string>& image)
 	}
 }
 
-void FindStartPoints(const std::vector<std::string>& image, std::stack<Point>& startPoints)
+void FindStartPoints(const std::vector<std::string>& image, std::vector<Point>& startPoints)
 {
-	for (size_t i = 0; i < image.size(); i++)
+	for (int i = 0; i < (int)image.size(); i++)
 	{
-		for (size_t j = 0; j < image[i].length(); j++)
+		for (int j = 0; j < (int)image[i].length(); j++)
 		{
 			if (image[i][j] == 'O')
 			{
-				startPoints.emplace(static_cast<int>(i), static_cast<int>(j));
+				startPoints.emplace_back(i, j);
 			}
 		}
 	}
@@ -169,88 +189,84 @@ bool IsBoundary(char ch)
 	return ch == '#';
 }
 
+int GetRowWidth(const std::vector<std::string>& image, int row)
+{
+	return (int)image[row].length();
+}
+
+char GetChar(const std::vector<std::string>& image, int row, int col)
+{
+	if (row < 0 || row >= (int)image.size())
+		return '\0';
+	if (col < 0 || col >= (int)image[row].length())
+		return ' '; // за пределами строки — пустое место
+	return image[row][col];
+}
+
+void SetChar(std::vector<std::string>& image, int row, int col, char ch)
+{
+	if (row < 0 || row >= (int)image.size())
+		return;
+	if (col >= MAX_IMAGE_SIZE)
+		return;
+	if (col >= (int)image[row].length())
+	{
+		image[row].append(col - (int)image[row].length() + 1, ' ');
+	}
+	image[row][col] = ch;
+}
+
 void FloodFill(std::vector<std::string>& image, int startRow, int startCol)
 {
-	int rows = static_cast<int>(image.size());
+	int rows = (int)image.size();
 	if (rows == 0)
 		return;
 
-	int cols = static_cast<int>(image[0].length());
-
-	if (!IsValidPoint(startRow, startCol, rows, cols))
-	{
+	char startChar = GetChar(image, startRow, startCol);
+	if (IsBoundary(startChar))
 		return;
-	}
 
-	if (IsBoundary(image[startRow][startCol]))
-	{
-		return;
-	}
+	std::vector<std::vector<bool>> visited(rows, std::vector<bool>(MAX_IMAGE_SIZE, false));
 
 	std::stack<Point> points;
 	points.emplace(startRow, startCol);
+	visited[startRow][startCol] = true;
+
+	const int dr[] = { -1, 1, 0, 0 };
+	const int dc[] = { 0, 0, -1, 1 };
 
 	while (!points.empty())
 	{
 		const Point current = points.top();
 		points.pop();
 
-		if (!IsValidPoint(current.row, current.col, rows, cols))
-		{
+		char ch = GetChar(image, current.row, current.col);
+
+		if (IsBoundary(ch))
 			continue;
+
+		if (ch == ' ')
+		{
+			SetChar(image, current.row, current.col, '.');
 		}
 
-		char currentChar = image[current.row][current.col];
-
-		if (IsBoundary(currentChar))
+		for (int d = 0; d < 4; d++)
 		{
-			continue;
-		}
+			int nr = current.row + dr[d];
+			int nc = current.col + dc[d];
 
-		if (currentChar == '.')
-		{
-			continue;
-		}
+			if (nr < 0 || nr >= rows || nc < 0 || nc >= MAX_IMAGE_SIZE)
+				continue;
 
-		if (currentChar == ' ')
-		{
-			image[current.row][current.col] = '.';
-		}
+			if (visited[nr][nc])
+				continue;
 
-		if (IsValidPoint(current.row - 1, current.col, rows, cols))
-		{
-			char neighborChar = image[current.row - 1][current.col];
-			if (!IsBoundary(neighborChar) && neighborChar != '.' && neighborChar != 'O')
-			{
-				points.emplace(current.row - 1, current.col);
-			}
-		}
+			char neighborChar = GetChar(image, nr, nc);
+			if (IsBoundary(neighborChar) || neighborChar == '.')
+				continue;
 
-		if (IsValidPoint(current.row + 1, current.col, rows, cols))
-		{
-			char neighborChar = image[current.row + 1][current.col];
-			if (!IsBoundary(neighborChar) && neighborChar != '.' && neighborChar != 'O')
-			{
-				points.emplace(current.row + 1, current.col);
-			}
-		}
-
-		if (IsValidPoint(current.row, current.col - 1, rows, cols))
-		{
-			char neighborChar = image[current.row][current.col - 1];
-			if (!IsBoundary(neighborChar) && neighborChar != '.' && neighborChar != 'O')
-			{
-				points.emplace(current.row, current.col - 1);
-			}
-		}
-
-		if (IsValidPoint(current.row, current.col + 1, rows, cols))
-		{
-			char neighborChar = image[current.row][current.col + 1];
-			if (!IsBoundary(neighborChar) && neighborChar != '.' && neighborChar != 'O')
-			{
-				points.emplace(current.row, current.col + 1);
-			}
+			visited[nr][nc] = true;
+			points.emplace(nr, nc);
 		}
 	}
 }
@@ -260,31 +276,33 @@ void ProcessImage(std::vector<std::string>& image)
 	if (image.empty())
 		return;
 
-	if (image.size() > MAX_IMAGE_SIZE)
+	if ((int)image.size() > MAX_IMAGE_SIZE)
 	{
 		image.resize(MAX_IMAGE_SIZE);
 	}
 
 	for (auto& line : image)
 	{
-		if (line.length() > MAX_IMAGE_SIZE)
+		if ((int)line.length() > MAX_IMAGE_SIZE)
 		{
 			line = line.substr(0, MAX_IMAGE_SIZE);
 		}
-		else if (line.length() < MAX_IMAGE_SIZE)
+		else if ((int)line.length() < MAX_IMAGE_SIZE)
 		{
-			line.append(MAX_IMAGE_SIZE - line.length(), ' ');
+			line.append(MAX_IMAGE_SIZE - (int)line.length(), ' ');
 		}
 	}
 
-	std::stack<Point> startPoints;
+	while ((int)image.size() < MAX_IMAGE_SIZE)
+	{
+		image.emplace_back(MAX_IMAGE_SIZE, ' ');
+	}
+
+	std::vector<Point> startPoints;
 	FindStartPoints(image, startPoints);
 
-	while (!startPoints.empty())
+	for (const auto& p : startPoints)
 	{
-		const Point p = startPoints.top();
-		startPoints.pop();
-
 		FloodFill(image, p.row, p.col);
 	}
 }
