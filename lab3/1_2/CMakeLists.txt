@@ -4,6 +4,9 @@ add_executable(car
         src/main.cpp
         src/Car.h
         src/Car.cpp
+        ../2_1/src/Calculator.h
+        ../2_1/src/Calculator.cpp
+        ../2_1/src/Controller.cpp
 )
 
 
