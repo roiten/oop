@@ -5,6 +5,8 @@
 
 int main()
 {
+	//вынести обработки команд
+
 	Car car;
 	std::string line;
 
@@ -13,9 +15,9 @@ int main()
 		if (line.empty())
 			continue;
 
-		std::istringstream iss(line);
+		std::istringstream inputStream(line);
 		std::string command;
-		iss >> command;
+		inputStream >> command;
 
 		if (command == "Info")
 		{
@@ -46,7 +48,7 @@ int main()
 		else if (command == "SetGear")
 		{
 			std::string arg;
-			if (!(iss >> arg))
+			if (!(inputStream >> arg))
 			{
 				std::cout << "Invalid command argument" << std::endl;
 				continue;
@@ -72,7 +74,7 @@ int main()
 		else if (command == "SetSpeed")
 		{
 			std::string arg;
-			if (!(iss >> arg))
+			if (!(inputStream >> arg))
 			{
 				std::cout << "Invalid command argument" << std::endl;
 				continue;

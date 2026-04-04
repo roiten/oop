@@ -48,7 +48,7 @@ void ReadNumbers(std::vector<double>& numbers)
 
 		if (!lineStream.eof())
 		{
-			throw std::exception("Invalid data");
+			throw std::runtime_error("Invalid data");
 		}
 	}
 }

@@ -1,9 +1,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "../src/Calculator.h"
 
+#include <cmath>
+
 TEST_CASE("Incorrect name of identifier")
 {
-	SECTION("A calculator")
+	SECTION("Calculator")
 	{
 		Calculator calc;
 
@@ -41,7 +43,9 @@ TEST_CASE("Incorrect name of identifier")
 		WHEN("create new function with value x and with name _123x")
 		{
 			calc.SetVarValue("x", "1");
+			//нужно сделать так чтобы читать удобно было
 			calc.SetFunctionValue(std::pair<std::string, Calculator::Expression>("fn", std::pair<char, std::vector<std::string>>(' ', { "x" })));
+			//вот это
 
 			THEN("fn exist")
 			{
@@ -65,7 +69,7 @@ TEST_CASE("Incorrect name of identifier")
 
 TEST_CASE("Creating vars with values of different vars")
 {
-	SECTION("A calculator")
+	SECTION("Calculator")
 	{
 		Calculator calc;
 
@@ -101,7 +105,7 @@ TEST_CASE("Creating vars with values of different vars")
 
 TEST_CASE("Creating functions")
 {
-	SECTION("A calculator")
+	SECTION("Calculator")
 	{
 		Calculator calc;
 
@@ -228,7 +232,7 @@ TEST_CASE("Creating functions")
 
 TEST_CASE("Value functions output")
 {
-	GIVEN("A calculator")
+	SECTION("Calculator")
 	{
 		Calculator calc;
 

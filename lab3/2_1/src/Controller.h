@@ -1,6 +1,6 @@
 #pragma once
 #include "Calculator.h"
-#include <ostream>
+#include <sstream>
 #include <string>
 
 class Controller
@@ -8,7 +8,6 @@ class Controller
 public:
 	Controller(Calculator& calculator, std::istream& input, std::ostream& output);
 	bool HandleCommand();
-
 private:
 	struct Arguments
 	{
@@ -19,13 +18,17 @@ private:
 	};
 
 	Arguments ParseArguments(const std::string& inputLine);
-
-	bool CreateVar(const std::string& args);
+	bool DefineVar(const std::string& args);
 	bool SetVarValue(const std::string& args);
 	bool CreateFunctionWithValue(const std::string& args);
 	bool PrintIdentifier(const std::string& args);
 	bool PrintAllVars(const std::string& args);
 	bool PrintAllFunctions(const std::string& args);
+	std::string TrimLeft(const std::string& str);
+	std::string ExtractExpression(std::istringstream& stream, std::string& identifier);
+	bool ReadIdentifier(std::istringstream& stream, std::string& identifier);
+	void RemoveSpaces(std::string& str);
+	void ParseExpression(const std::string& expression, Arguments& args);
 
 	Calculator& m_calculator;
 	std::istream& m_input;

@@ -11,6 +11,7 @@ add_executable(calculator
 
 add_executable(calculator_tests
         tests/calculator_tests.cpp
+#        tests/controller_tests.cpp
         src/Calculator.h
         src/Calculator.cpp
 )

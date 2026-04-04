@@ -1,4 +1,4 @@
-#include "dict.h"
+#include "Dict.h"
 
 #include "InputSpread.h"
 
@@ -29,7 +29,7 @@ ListWords SplitTranslations(const std::string& line)
 
 	if (result.empty())
 	{
-		throw std::exception("Отсутствует перевод");
+		throw std::runtime_error("Отсутствует перевод");
 	}
 
 	return result;
@@ -40,7 +40,7 @@ std::pair<std::string, ListWords> ParseDictionaryLine(const std::string& line)
 	size_t pos = line.find(" - ");
 	if (pos == std::string::npos)
 	{
-		throw std::exception("Некорректный формат строки");
+		throw std::runtime_error("Некорректный формат строки");
 	}
 
 	std::string word = NormalizeText(line.substr(0, pos));
@@ -86,7 +86,7 @@ void SaveDictionary(const std::string& fileName, const Dictionary& dictionary)
 {
 	std::ofstream file(fileName);
 	if (!file.is_open())
-		throw std::exception("Не удалось открыть файл для записи");
+		throw std::runtime_error("Не удалось открыть файл для записи");
 
 	for (const auto& [word, translations] : dictionary)
 	{
