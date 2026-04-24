@@ -36,10 +36,10 @@ void FloodFill(std::vector<std::string>& image, int startRow, int startCol);
 void ProcessImage(std::vector<std::string>& image);
 void SaveImage(std::ostream& output, const std::vector<std::string>& image);
 
-bool g_isFileMode = false;
-
 int main(const int argc, char* argv[])
 {
+	std::locale::global(std::locale("ru_RU.utf8"));
+
 	std::string inputFilePath, outputFilePath;
 	Mode mode;
 
@@ -61,7 +61,6 @@ int main(const int argc, char* argv[])
 
 	if (mode == Mode::File)
 	{
-		g_isFileMode = true;
 		try
 		{
 			ProcessFiles(inputFilePath, outputFilePath);
@@ -110,10 +109,10 @@ void PrintHelp()
 {
 	std::cout << "fill.exe - программа для заливки контуров\n"
 			  << "Использование:\n"
+			  << "fill.exe -h - инструкция по использованию\n"
+			  << "fill.exe <input file> <output file>\n"
 			  << "Максимальный размер изображения: " << MAX_IMAGE_SIZE << "x" << MAX_IMAGE_SIZE << "\n"
-			  << "fill.exe <input file> <output file> - обработка файлов\n"
 			  << "fill.exe - ввод через stdin\n"
-			  << "fill.exe -h - показать справку\n"
 			  << "Символ 'O' (англ.) - точки начала заливки\n"
 			  << "Символ '#' - границы контуров\n"
 			  << "Символ '.' - результат заливки\n"
@@ -155,7 +154,7 @@ void LoadImage(std::istream& input, std::vector<std::string>& image)
 
 	while (std::getline(input, line) && rowCount < MAX_IMAGE_SIZE)
 	{
-		if ((int)line.length() > MAX_IMAGE_SIZE)
+		if (static_cast<int>(line.length()) > MAX_IMAGE_SIZE)
 		{
 			line = line.substr(0, MAX_IMAGE_SIZE);
 		}
@@ -167,12 +166,13 @@ void LoadImage(std::istream& input, std::vector<std::string>& image)
 
 void FindStartPoints(const std::vector<std::string>& image, std::vector<Point>& startPoints)
 {
-	for (int i = 0; i < (int)image.size(); i++)
+	for (int i = 0; i < static_cast<int>(image.size()); i++)
 	{
-		for (int j = 0; j < (int)image[i].length(); j++)
+		for (int j = 0; j < static_cast<int>(image[i].size()); j++)
 		{
 			if (image[i][j] == 'O')
 			{
+				//заиспользовать find
 				startPoints.emplace_back(i, j);
 			}
 		}
@@ -189,36 +189,36 @@ bool IsBoundary(char ch)
 	return ch == '#';
 }
 
-int GetRowWidth(const std::vector<std::string>& image, int row)
+int GetRowWidth(const std::vector<std::string>& image, const int row)
 {
-	return (int)image[row].length();
+	return static_cast<int>(image[row].length());
 }
 
 char GetChar(const std::vector<std::string>& image, int row, int col)
 {
-	if (row < 0 || row >= (int)image.size())
+	if (row < 0 || row >= static_cast<int>(image.size()))
 		return '\0';
-	if (col < 0 || col >= (int)image[row].length())
-		return ' '; // за пределами строки — пустое место
+	if (col < 0 || col >= static_cast<int>(image[row].length()))
+		return ' ';
 	return image[row][col];
 }
 
 void SetChar(std::vector<std::string>& image, int row, int col, char ch)
 {
-	if (row < 0 || row >= (int)image.size())
+	if (row < 0 || row >= static_cast<int>(image.size()))
 		return;
 	if (col >= MAX_IMAGE_SIZE)
 		return;
-	if (col >= (int)image[row].length())
+	if (col >= static_cast<int>(image[row].length()))
 	{
-		image[row].append(col - (int)image[row].length() + 1, ' ');
+		image[row].append(col - static_cast<int>(image[row].length()) + 1, ' ');
 	}
 	image[row][col] = ch;
 }
 
 void FloodFill(std::vector<std::string>& image, int startRow, int startCol)
 {
-	int rows = (int)image.size();
+	int rows = static_cast<int>(image.size());
 	if (rows == 0)
 		return;
 
@@ -226,21 +226,24 @@ void FloodFill(std::vector<std::string>& image, int startRow, int startCol)
 	if (IsBoundary(startChar))
 		return;
 
+	//подумать как подразбить
+	//добавляем свои типы
+
 	std::vector<std::vector<bool>> visited(rows, std::vector<bool>(MAX_IMAGE_SIZE, false));
 
 	std::stack<Point> points;
 	points.emplace(startRow, startCol);
 	visited[startRow][startCol] = true;
 
-	const int dr[] = { -1, 1, 0, 0 };
-	const int dc[] = { 0, 0, -1, 1 };
+	const int rowStep[] = { -1, 1, 0, 0 };
+	const int columnStep[] = { 0, 0, -1, 1 };
 
 	while (!points.empty())
 	{
 		const Point current = points.top();
 		points.pop();
 
-		char ch = GetChar(image, current.row, current.col);
+		const char ch = GetChar(image, current.row, current.col);
 
 		if (IsBoundary(ch))
 			continue;
@@ -250,50 +253,51 @@ void FloodFill(std::vector<std::string>& image, int startRow, int startCol)
 			SetChar(image, current.row, current.col, '.');
 		}
 
-		for (int d = 0; d < 4; d++)
+		for (int availableStep = 0; availableStep < 4; availableStep++)
 		{
-			int nr = current.row + dr[d];
-			int nc = current.col + dc[d];
+			int nextPointRowPos = current.row + rowStep[availableStep];
+			int nextPointColumnPos = current.col + columnStep[availableStep];
 
-			if (nr < 0 || nr >= rows || nc < 0 || nc >= MAX_IMAGE_SIZE)
+			if (nextPointRowPos < 0 || nextPointRowPos >= rows || nextPointColumnPos < 0 || nextPointColumnPos >= MAX_IMAGE_SIZE)
 				continue;
 
-			if (visited[nr][nc])
+			if (visited[nextPointRowPos][nextPointColumnPos])
 				continue;
 
-			char neighborChar = GetChar(image, nr, nc);
+			char neighborChar = GetChar(image, nextPointRowPos, nextPointColumnPos);
 			if (IsBoundary(neighborChar) || neighborChar == '.')
 				continue;
 
-			visited[nr][nc] = true;
-			points.emplace(nr, nc);
+			visited[nextPointRowPos][nextPointColumnPos] = true;
+			points.emplace(nextPointRowPos, nextPointColumnPos);
 		}
 	}
 }
 
 void ProcessImage(std::vector<std::string>& image)
+//разбить на подфункции
 {
 	if (image.empty())
 		return;
 
-	if ((int)image.size() > MAX_IMAGE_SIZE)
+	if (static_cast<int>(image.size()) > MAX_IMAGE_SIZE)
 	{
 		image.resize(MAX_IMAGE_SIZE);
 	}
 
 	for (auto& line : image)
 	{
-		if ((int)line.length() > MAX_IMAGE_SIZE)
+		if (static_cast<int>(line.length()) > MAX_IMAGE_SIZE)
 		{
 			line = line.substr(0, MAX_IMAGE_SIZE);
 		}
-		else if ((int)line.length() < MAX_IMAGE_SIZE)
+		else if (static_cast<int>(line.length()) < MAX_IMAGE_SIZE)
 		{
-			line.append(MAX_IMAGE_SIZE - (int)line.length(), ' ');
+			line.append(MAX_IMAGE_SIZE - static_cast<int>(line.length()), ' ');
 		}
 	}
 
-	while ((int)image.size() < MAX_IMAGE_SIZE)
+	while (static_cast<int>(image.size()) < MAX_IMAGE_SIZE)
 	{
 		image.emplace_back(MAX_IMAGE_SIZE, ' ');
 	}

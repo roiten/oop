@@ -23,7 +23,7 @@ std::set<uint64_t> GeneratePrimeNumbersSet(const uint64_t upperBound)
 	{
 		isPrime[i] = false;
 	}
-
+	//убыстрить в 5 раза моно - подумать
 	for (uint64_t i = 3; i * i <= upperBound; i = i + 2)
 	{
 		if (isPrime[i])

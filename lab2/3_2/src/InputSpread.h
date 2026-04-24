@@ -23,8 +23,22 @@ inline std::string NormalizeText(const std::string& input)
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	std::wstring wstr = converter.from_bytes(Trim(input));
 
-	//transform
-	std::ranges::transform(wstr, wstr.begin(), ::tolower);
+	//transform не работает - одумать
+	// std::ranges::transform(wstr, wstr.begin(), ::tolower);
+	for (wchar_t& ch : wstr)
+	{
+		ch = std::towlower(ch);
+	}
 
 	return converter.to_bytes(wstr);
+}
+
+inline std::string StringToLower(const std::string& inputString)
+{
+	std::string loweredString;
+	for (char ch : inputString)
+	{
+		loweredString += tolower(ch);
+	}
+	return loweredString;
 }

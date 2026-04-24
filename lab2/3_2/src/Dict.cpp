@@ -74,11 +74,14 @@ void AddTranslation(Dictionary& dictionary,
 	const std::string& word,
 	const std::string& translationLine)
 {
+	std::string normalizedWord = NormalizeText(word);
 	ListWords translations = SplitTranslations(translationLine);
+
 	for (const auto& translation : translations)
 	{
-		dictionary[word].insert(NormalizeText(translation));
-		dictionary[NormalizeText(translation)].insert(word);
+		std::string normalizedTrans = NormalizeText(translation);
+		dictionary[normalizedWord].insert(normalizedTrans);
+		dictionary[normalizedTrans].insert(normalizedWord);
 	}
 }
 

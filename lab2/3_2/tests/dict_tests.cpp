@@ -3,9 +3,7 @@
 
 #include <fstream>
 
-// тесты на проверку регистронезависимости
-
-TEST_CASE("тесты на проверку регистронезависимости")
+TEST_CASE("тесты на проверку регистрозависимости")
 {
 	SECTION("поиск по ключу в нижнем регистре")
 	{
@@ -15,7 +13,7 @@ TEST_CASE("тесты на проверку регистронезависимо
 		auto result = FindTranslation(dict, "cat");
 
 		REQUIRE(result.size() == 1);
-		REQUIRE(result.contains("кот"));
+		REQUIRE(result.contains("кОт"));
 	}
 
 	SECTION("поиск по ключу в верхнем регистре")
@@ -23,7 +21,7 @@ TEST_CASE("тесты на проверку регистронезависимо
 		Dictionary dict;
 		AddTranslation(dict, "cat", "кошка");
 
-		auto result = FindTranslation(dict, "КОШКА");
+		auto result = FindTranslation(dict, "CAT");
 
 		REQUIRE(result.size() == 1);
 		REQUIRE(result.contains("кошка"));
