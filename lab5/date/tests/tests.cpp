@@ -63,11 +63,6 @@ TEST_CASE("Constructor Tests")
 		REQUIRE_THROWS_AS(MyDate(2932897), std::out_of_range);
 		REQUIRE_THROWS_AS(MyDate(2932896 + 365), std::out_of_range);
 	}
-}
-
-
-TEST_CASE("Validation Tests")
-{
 
 	SECTION("Valid date - leap year (29.02.2020)")
 	{
@@ -149,7 +144,7 @@ TEST_CASE("WeekDay Tests")
 	}
 }
 
-TEST_CASE("Increment/Decrement Tests")
+TEST_CASE("Increment-Decrement")
 {
 
 	SECTION("Prefix increment")
@@ -267,7 +262,7 @@ TEST_CASE("Addition Tests")
 		AssertDateEquals(newDate, 31, Month::July, 2005, WeekDay::Sunday);
 	}
 
-	SECTION("Add negative days (subtract)")
+	SECTION("Add negative days")
 	{
 		MyDate date(15, Month::June, 2020);
 		auto newDate = date + (-5);
@@ -320,7 +315,6 @@ TEST_CASE("Addition Tests")
 
 TEST_CASE("Subtraction Tests")
 {
-
 	SECTION("Subtract positive days")
 	{
 		MyDate date(3, Month::July, 2005);
@@ -573,7 +567,7 @@ TEST_CASE("Output Operator Tests")
 TEST_CASE("Input Operator Tests")
 {
 
-	SECTION("Input valid format (12.03.2020)")
+	SECTION("Valid format (12.03.2020)")
 	{
 		std::stringstream ss("12.03.2020");
 		MyDate date;
@@ -609,7 +603,7 @@ TEST_CASE("Input Operator Tests")
 		AssertDateEquals(date, 5, Month::March, 2020, WeekDay::Thursday);
 	}
 
-	SECTION("with whitespaces")
+	SECTION("With whitespaces")
 	{
 		std::stringstream ss("  15.08.2025  ");
 		MyDate date;
