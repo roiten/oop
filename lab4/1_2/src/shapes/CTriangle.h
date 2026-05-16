@@ -2,6 +2,7 @@
 #include "ISolidShape.h"
 #include "Point.h"
 #include <string>
+#include <cstdint>
 
 class CTriangle : public ISolidShape
 {

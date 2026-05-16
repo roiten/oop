@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 class CLineSegment : public IShape
 {

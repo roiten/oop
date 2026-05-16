@@ -1,7 +1,6 @@
 #include "Simulation/Simulation.h"
 #include <iostream>
 #include <string>
-#include <windows.h>
 
 struct Arguments
 {
@@ -27,9 +26,6 @@ Arguments ParseArgs(int argc, char const* argv[])
 int main(int argc, char const* argv[])
 {
 	Arguments args;
-
-	SetConsoleOutputCP(CP_UTF8);
-	SetConsoleCP(CP_UTF8);
 
 	try
 	{

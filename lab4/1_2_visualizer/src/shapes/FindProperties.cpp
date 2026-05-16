@@ -1,5 +1,7 @@
 #include "FindProperties.h"
 
+#include <algorithm>
+
 std::shared_ptr<IShape> FindShapeWithMaxArea(const std::vector<std::shared_ptr<IShape>>& shapes)
 {
 	if (shapes.empty())

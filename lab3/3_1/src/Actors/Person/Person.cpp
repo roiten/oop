@@ -1,6 +1,7 @@
 #include "Person.h"
 #include <limits>
 #include <random>
+#include <stdexcept>
 
 Person::Person(Name name, Money cash)
 	: m_name(name)

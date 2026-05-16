@@ -2,6 +2,7 @@
 #include "IShape.h"
 #include "sstream"
 #include <string>
+#include <cstdint>
 
 class ISolidShape : public IShape
 {

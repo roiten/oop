@@ -11,9 +11,9 @@ sf::Color CCanvas::ConvertColor(uint32_t color) const
     uint8_t g = (color >> 8) & 0xFF;
     uint8_t b = color & 0xFF;
     uint8_t a = (color >> 24) & 0xFF;
-    
+
     if (a == 0) a = 255;
-    
+
     return {r, g, b, a};
 }
 
@@ -29,16 +29,17 @@ void CCanvas::DrawLine(const CPoint& from, const CPoint& to, uint32_t lineColor)
 void CCanvas::FillPolygon(const std::vector<CPoint>& points, uint32_t fillColor)
 {
     if (points.size() < 3) return;
-    
+
     sf::ConvexShape polygon;
     polygon.setPointCount(points.size());
     polygon.setFillColor(ConvertColor(fillColor));
-    
-    for (auto& point : points)
-    {
-        polygon.setPoint(index, sf::Vector2f(static_cast<float>(point.x), static_cast<float>(point.y)));
-    }
-    
+
+	std::size_t index = 0;
+	for (const auto& point : points)
+	{
+		polygon.setPoint(index++, sf::Vector2f(static_cast<float>(point.x), static_cast<float>(point.y)));
+	}
+
     m_window.draw(polygon);
 }
 
