@@ -1,5 +1,6 @@
 #include "Calculator.h"
 
+#include <cmath>
 #include <regex>
 
 bool Calculator::DefineVar(const std::string& varName)
@@ -43,6 +44,7 @@ std::map<std::string, double> Calculator::GetAllFunctions() const
 
 bool Calculator::SetVarValue(const std::string& varName, const std::string& value)
 {
+
 	if (!IsVarAlreadyExist(varName))
 	{
 		bool varWasCreated = DefineVar(varName);
@@ -56,6 +58,8 @@ bool Calculator::SetVarValue(const std::string& varName, const std::string& valu
 		return true;
 	}
 
+	//восстановить тесты на цифры+буквы (123q)
+
 	if (IsVarAlreadyExist(value))
 	{
 		m_memoryVars.find(varName)->second = m_memoryVars.find(value)->second;
@@ -66,12 +70,12 @@ bool Calculator::SetVarValue(const std::string& varName, const std::string& valu
 
 bool Calculator::SetFunctionValue(const Function& function)
 {
-	if (IsVarAlreadyExist(function.first))
+	if (!IsValidName(function.first))
 	{
 		return false;
 	}
 
-	if (!IsValidName(function.first))
+	if (IsVarAlreadyExist(function.first))
 	{
 		return false;
 	}

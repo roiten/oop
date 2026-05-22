@@ -30,7 +30,7 @@ std::string GetFileName(const int argc, char* argv[])
 {
 	if (argc != 2)
 	{
-		throw std::exception("Укажите имя файла со словарём!");
+		throw std::runtime_error("Укажите имя файла со словарём!");
 	}
 	return argv[1];
 }

@@ -1,11 +1,17 @@
 #include "CTriangle.h"
-#include <iomanip>
-#include <sstream>
 #include <cmath>
 #include <cstdlib>
+#include <iomanip>
+#include <sstream>
 
 CTriangle::CTriangle(const CPoint& v1, const CPoint& v2, const CPoint& v3, uint32_t outlineColor, uint32_t fillColor)
-	: m_v1(v1), m_v2(v2), m_v3(v3), m_outlineColor(outlineColor), m_fillColor(fillColor) {}
+	: m_v1(v1)
+	, m_v2(v2)
+	, m_v3(v3)
+	, m_outlineColor(outlineColor)
+	, m_fillColor(fillColor)
+{
+}
 
 double CTriangle::GetArea() const
 {
@@ -17,17 +23,19 @@ double CTriangle::GetPerimeter() const
 	return GetSideLength(m_v1, m_v2) + GetSideLength(m_v2, m_v3) + GetSideLength(m_v3, m_v1);
 }
 
-std::string CTriangle::ToString() const
+std::string CTriangle::GetType() const
 {
-	std::ostringstream oss;
-	oss << std::fixed << std::setprecision(2);
-	oss << "Triangle:\n  Vertex1: (" << m_v1.x << ", " << m_v1.y << ")\n"
-		<< "  Vertex2: (" << m_v2.x << ", " << m_v2.y << ")\n"
-		<< "  Vertex3: (" << m_v3.x << ", " << m_v3.y << ")\n"
-		<< "  Area: " << GetArea() << "\n  Perimeter: " << GetPerimeter() << "\n"
-		<< "  Outline color: #" << std::hex << std::setw(6) << std::setfill('0') << m_outlineColor << "\n"
-		<< "  Fill color: #" << std::setw(6) << std::setfill('0') << m_fillColor << std::dec;
-	return oss.str();
+	return "Triangle";
+}
+
+void CTriangle::AppendProperties(std::ostream &output) const
+{
+	output << std::fixed << std::setprecision(2);
+	output << "Vertex1: (" << m_v1.x << ", " << m_v1.y << ")\n"
+		   << "Vertex2: (" << m_v2.x << ", " << m_v2.y << ")\n"
+		   << "Vertex3: (" << m_v3.x << ", " << m_v3.y << ")\n"
+		   << "Outline color: #" << std::hex << std::setw(6) << std::setfill('0') << m_outlineColor << "\n"
+		   << "Fill color: #" << std::setw(6) << std::setfill('0') << m_fillColor << std::dec;
 }
 
 uint32_t CTriangle::GetOutlineColor() const

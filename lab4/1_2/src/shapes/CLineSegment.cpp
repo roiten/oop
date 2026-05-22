@@ -1,4 +1,5 @@
 #include "CLineSegment.h"
+#include <math.h>
 
 CLineSegment::CLineSegment(const CPoint& start, const CPoint& end, uint32_t outlineColor)
 	: m_start(start), m_end(end), m_outlineColor(outlineColor) {}

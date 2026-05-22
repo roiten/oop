@@ -14,6 +14,9 @@ add_executable(car_tests
         tests/car_tests.cpp
         src/Car.h
         src/Car.cpp
+        src/Engine.h
+        src/Gear.h
+        src/Gear.cpp
 )
 
 target_link_libraries(car_tests PRIVATE Catch2::Catch2WithMain)

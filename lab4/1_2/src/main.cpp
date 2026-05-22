@@ -4,6 +4,9 @@
 #include "shapes/CTriangle.h"
 #include "shapes/IShape.h"
 
+#include <algorithm>
+#include <ranges>
+#include <sstream>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -15,32 +18,31 @@ uint32_t ParseColor(const std::string& hexStr)
     try {
         return static_cast<uint32_t>(std::stoul(hexStr, nullptr, 16));
     } catch (...) {
-        return 000000;
+    	std::cerr << "Incorrect color format" << std::endl;
+        return 0;
     }
 }
 
-
+//вынести получение перимтра и плаощади и протестировать
 std::shared_ptr<IShape> FindShapeWithMaxArea(const std::vector<std::shared_ptr<IShape>>& shapes)
 {
     if (shapes.empty()) return nullptr;
-    return *std::max_element(shapes.begin(), shapes.end(),
-        [](const auto& s1, const auto& s2) { return s1->GetArea() < s2->GetArea(); });
+    return *std::ranges::max_element(shapes,
+        [](const auto& shape1, const auto& shape2) { return shape1->GetArea() < shape2->GetArea(); });
 }
 
 std::shared_ptr<IShape> FindShapeWithMinPerimeter(const std::vector<std::shared_ptr<IShape>>& shapes)
 {
     if (shapes.empty()) return nullptr;
-    return *std::min_element(shapes.begin(), shapes.end(),
+    return *std::ranges::min_element(shapes,
         [](const auto& s1, const auto& s2) { return s1->GetPerimeter() < s2->GetPerimeter(); });
 }
-
 
 int main()
 {
     std::vector<std::shared_ptr<IShape>> shapes;
     std::string line;
 
-    // Чтение до EOF (Ctrl+D / Ctrl+Z)
     while (std::getline(std::cin, line))
     {
         if (line.empty()) continue;
@@ -99,11 +101,11 @@ int main()
     auto maxAreaShape = FindShapeWithMaxArea(shapes);
     auto minPerimeterShape = FindShapeWithMinPerimeter(shapes);
 
-    std::cout << "=== Shape with maximum area ===\n";
-    std::cout << maxAreaShape->ToString() << "\n\n";
+    std::cout << "Shape with maximum area" << std::endl;
+    std::cout << maxAreaShape->ToString() << std::endl;
 
-    std::cout << "=== Shape with minimum perimeter ===\n";
-    std::cout << minPerimeterShape->ToString() << "\n";
+    std::cout << "\n Shape with minimum perimeter:" << std::endl;
+    std::cout << minPerimeterShape->ToString() << std::endl;
 
     return 0;
 }

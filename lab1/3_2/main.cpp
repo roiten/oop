@@ -42,7 +42,7 @@ void ReadFile(std::ifstream& inputFile, std::array<std::array<double, 3>, 3>& ma
 
 		if (delimCount != 2)
 		{
-			throw std::exception("Invalid matrix format");
+			throw std::runtime_error("Invalid matrix format");
 		}
 
 		std::istringstream lineStream(line);
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 
 				if (delimCount != 2)
 				{
-					throw std::exception("Invalid matrix format");
+					throw std::runtime_error("Invalid matrix format");
 				}
 
 				std::istringstream lineStream(line);
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 
 			if (!inputFile.is_open())
 			{
-				throw std::exception("Cannot open file");
+				throw std::runtime_error("Cannot open file");
 			}
 
 			ReadFile(inputFile, matrix);

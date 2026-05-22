@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 		std::cout << ans.size() << " " << maxNumber << std::endl;
 		const time_t stop = time(nullptr);
 		const double seconds = difftime(stop, start);
-		std::cout << "Time taken: " << seconds << " seconds" << std::endl;
+		std::cout << "Time : " << seconds << " seconds" << std::endl;
 	}
 	catch (const std::exception& error)
 	{

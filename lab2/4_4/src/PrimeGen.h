@@ -1,4 +1,5 @@
 #pragma once
 #include <set>
+#include <cstdint>
 
-std::set<uint64_t> GeneratePrimeNumbersSet(uint64_t upperBound);
+std::set<u_int64_t> GeneratePrimeNumbersSet(uint64_t upperBound);

@@ -3,26 +3,20 @@ project(shapes)
 add_executable(shapes
         src/main.cpp
 
-        src/shapes/CCircle.h
-        src/shapes/CLineSegment.h
-        src/shapes/CRectangle.h
-        src/shapes/CTriangle.h
-        src/shapes/IShape.h
-        src/shapes/ISolidShape.h
-        src/shapes/Point.h
+        src/shapes/CCircle.cpp
+        src/shapes/CLineSegment.cpp
+        src/shapes/CRectangle.cpp
+        src/shapes/CTriangle.cpp
 )
 
 
 add_executable(shapes_tests
         tests/shapes_tests.cpp
 
-        src/shapes/CCircle.h
-        src/shapes/CLineSegment.h
-        src/shapes/CRectangle.h
-        src/shapes/CTriangle.h
-        src/shapes/IShape.h
-        src/shapes/ISolidShape.h
-        src/shapes/Point.h
+        src/shapes/CCircle.cpp
+        src/shapes/CLineSegment.cpp
+        src/shapes/CRectangle.cpp
+        src/shapes/CTriangle.cpp
 )
 
-target_link_libraries(car_tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(shapes_tests PRIVATE Catch2::Catch2WithMain)

@@ -29,6 +29,8 @@ TEST_CASE("битые сущности")
     REQUIRE(HtmlDecode("&amp") == "&amp");
     REQUIRE(HtmlDecode("Hello &lt World") == "Hello &lt World");
     REQUIRE(HtmlDecode("A & B") == "A & B");
+	REQUIRE(HtmlDecode("amp;") == "amp;");
+
 }
 
 TEST_CASE("вложенные html сущности")

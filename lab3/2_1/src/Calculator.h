@@ -9,6 +9,8 @@ public:
 	using Expression = std::pair<char, std::vector<std::string>>;
 	using Function = std::pair<std::string, Expression>;
 
+	//добавить для памяти using-ги
+
 	bool DefineVar(const std::string& varName);
 	bool SetVarValue(const std::string& varName, const std::string& value);
 	bool SetFunctionValue(const Function& function);
@@ -19,6 +21,8 @@ public:
 private:
 	std::vector<char> m_operators = { '+', '-', '*', '/' };
 
+	//используем хэш таблицы
+	//variableContainer, fnsContainer
 	std::map<std::string, double> m_memoryVars;
 	std::map<std::string, Expression> m_memoryFunctions;
 

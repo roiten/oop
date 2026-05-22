@@ -1,5 +1,7 @@
 #include "Controller.h"
 
+#include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 
@@ -21,29 +23,37 @@ bool Controller::HandleCommand()
 	stream >> action;
 	std::getline(stream, args);
 
-	if (action == "var")      return CreateVar(args);
-	if (action == "let")      return SetVarValue(args);
-	if (action == "fn")       return CreateFunctionWithValue(args);
-	if (action == "print")    return PrintIdentifier(args);
-	if (action == "printvars") return PrintAllVars(args);
-	if (action == "printfns") return PrintAllFunctions(args);
+	//сделать обработку команд через map
 
-	m_output << "Unknown command\n";
+	if (action == "var")
+		return DefineVar(args);
+	if (action == "let")
+		return SetVarValue(args);
+	if (action == "fn")
+		return CreateFunctionWithValue(args);
+	if (action == "print")
+		return PrintIdentifier(args);
+	if (action == "printvars")
+		return PrintAllVars(args);
+	if (action == "printfns")
+		return PrintAllFunctions(args);
+
+	m_output << "Unknown command" << std::endl;
 	return false;
 }
 
-bool Controller::CreateVar(const std::string& args)
+bool Controller::DefineVar(const std::string& args)
 {
-	auto a = ParseArguments(args);
-	if (a.identifierName.empty() || !a.firstOperand.empty() || !a.secondOperand.empty() || a.operationSymbol != ' ')
+	auto arguments = ParseArguments(args);
+	if (arguments.identifierName.empty() || !arguments.firstOperand.empty() || !arguments.secondOperand.empty() || arguments.operationSymbol != ' ')
 	{
 		m_output << "Invalid usage\n";
 		return false;
 	}
 
-	if (!m_calculator.DefineVar(a.identifierName))
+	if (!m_calculator.DefineVar(arguments.identifierName))
 	{
-		m_output << "Name already exists\n";
+		m_output << "Name already exists" << std::endl;
 		return false;
 	}
 	return true;
@@ -51,14 +61,14 @@ bool Controller::CreateVar(const std::string& args)
 
 bool Controller::SetVarValue(const std::string& args)
 {
-	auto a = ParseArguments(args);
-	if (a.identifierName.empty() || a.firstOperand.empty() || !a.secondOperand.empty() || a.operationSymbol != ' ')
+	auto arguments = ParseArguments(args);
+	if (arguments.identifierName.empty() || arguments.firstOperand.empty() || !arguments.secondOperand.empty() || arguments.operationSymbol != ' ')
 	{
-		m_output << "Invalid usage\n";
+		m_output << "Invalid usage" << std::endl;
 		return false;
 	}
 
-	if (!m_calculator.SetVarValue(a.identifierName, a.firstOperand))
+	if (!m_calculator.SetVarValue(arguments.identifierName, arguments.firstOperand))
 	{
 		m_output << "Name does not exist\n";
 		return false;
@@ -68,22 +78,22 @@ bool Controller::SetVarValue(const std::string& args)
 
 bool Controller::CreateFunctionWithValue(const std::string& args)
 {
-	auto a = ParseArguments(args);
-	if (a.identifierName.empty() || a.firstOperand.empty())
+	auto arguments = ParseArguments(args);
+	if (arguments.identifierName.empty() || arguments.firstOperand.empty())
 	{
-		m_output << "Invalid usage\n";
+		m_output << "Invalid usage" << std::endl;
 		return false;
 	}
 
 	std::vector<std::string> expr;
-	expr.push_back(a.firstOperand);
-	if (!a.secondOperand.empty())
-		expr.push_back(a.secondOperand);
+	expr.push_back(arguments.firstOperand);
+	if (!arguments.secondOperand.empty())
+		expr.push_back(arguments.secondOperand);
 
-	Calculator::Function fn = { a.identifierName, { a.operationSymbol, expr } };
+	Calculator::Function fn = { arguments.identifierName, { arguments.operationSymbol, expr } };
 	if (!m_calculator.SetFunctionValue(fn))
 	{
-		m_output << "Name already exists\n";
+		m_output << "Name already exists" << std::endl;
 		return false;
 	}
 	return true;
@@ -96,9 +106,9 @@ bool Controller::PrintAllVars(const std::string&)
 	{
 		m_output << name << ":";
 		if (std::isnan(val))
-			m_output << "nan\n";
+			m_output << "nan" << std::endl;
 		else
-			m_output << std::fixed << std::setprecision(2) << val << "\n";
+			m_output << std::fixed << std::setprecision(2) << val << std::endl;
 	}
 	return true;
 }
@@ -110,9 +120,9 @@ bool Controller::PrintAllFunctions(const std::string&)
 	{
 		m_output << name << ":";
 		if (std::isnan(val))
-			m_output << "nan\n";
+			m_output << "nan" << std::endl;
 		else
-			m_output << std::fixed << std::setprecision(2) << val << "\n";
+			m_output << std::fixed << std::setprecision(2) << val << std::endl;
 	}
 	return true;
 }
@@ -122,74 +132,110 @@ bool Controller::PrintIdentifier(const std::string& args)
 	auto a = ParseArguments(args);
 	if (a.identifierName.empty() || !a.firstOperand.empty() || !a.secondOperand.empty() || a.operationSymbol != ' ')
 	{
-		m_output << "Invalid usage\n";
+		m_output << "Invalid usage" << std::endl;
 		return false;
 	}
 
 	double val = m_calculator.GetIdentifierValue(a.identifierName);
 	if (std::isnan(val))
-		m_output << "nan\n";
+		m_output << "nan" << std::endl;
 	else
-		m_output << std::fixed << std::setprecision(2) << val << "\n";
+		m_output << std::fixed << std::setprecision(2) << val << std::endl;
 
 	return true;
 }
 
-Controller::Arguments Controller::ParseArguments(const std::string& inputLine)
+std::string Controller::TrimLeft(const std::string& str)
 {
-	Arguments a;
-	a.operationSymbol = ' ';
+	size_t start = str.find_first_not_of(' ');
+	return (start == std::string::npos)
+		? ""
+		: str.substr(start);
+}
 
-	if (inputLine.empty()) return a;
+bool Controller::ReadIdentifier(std::istringstream& stream, std::string& identifier)
+{
+	stream >> identifier;
+	return !identifier.empty();
+}
 
-	std::string line = inputLine;
-	size_t start = line.find_first_not_of(' ');
-	if (start == std::string::npos) return a;
-	line = line.substr(start);
+std::string Controller::ExtractExpression(std::istringstream& stream, std::string& identifier)
+{
+	size_t eqPos = identifier.find('=');
 
-	std::istringstream stream(line);
-	stream >> a.identifierName;
-	if (a.identifierName.empty()) return a;
-
-	size_t eqPos = a.identifierName.find('=');
-	std::string rest;
 	if (eqPos != std::string::npos)
 	{
-		rest = a.identifierName.substr(eqPos + 1);
-		a.identifierName = a.identifierName.substr(0, eqPos);
-	}
-	else
-	{
-		std::string eq;
-		stream >> eq;
-		if (eq != "=") return a;
-		std::getline(stream, rest);
+		std::string expression = identifier.substr(eqPos + 1);
+		identifier = identifier.substr(0, eqPos);
+		return expression;
 	}
 
-	rest.erase(std::remove(rest.begin(), rest.end(), ' '), rest.end());
-	if (rest.empty()) return a;
+	std::string equalsSign;
+	stream >> equalsSign;
 
-	size_t opPos = std::string::npos;
-	for (size_t i = 1; i < rest.size(); ++i)
+	if (equalsSign != "=")
+		return "";
+
+	std::string expression;
+	std::getline(stream, expression);
+	return expression;
+}
+
+void Controller::RemoveSpaces(std::string& str)
+{
+	str.erase(std::ranges::remove(str, ' ').begin(), str.end());
+}
+
+void Controller::ParseExpression(const std::string& expression, Arguments& args)
+{
+	size_t operatorPos = std::string::npos;
+
+	for (size_t i = 1; i < expression.size(); ++i)
 	{
-		char c = rest[i];
-		if (c == '+' || c == '-' || c == '*' || c == '/')
+		char oper = expression[i];
+		if (oper == '+' || oper == '-' || oper == '*' || oper == '/')
 		{
-			opPos = i;
+			operatorPos = i;
 			break;
 		}
 	}
 
-	if (opPos == std::string::npos)
+	if (operatorPos == std::string::npos)
 	{
-		a.firstOperand = rest;
-	}
-	else
-	{
-		a.firstOperand = rest.substr(0, opPos);
-		a.operationSymbol = rest[opPos];
-		a.secondOperand = rest.substr(opPos + 1);
+		args.firstOperand = expression;
+		return;
 	}
 
-	return a;
+	args.firstOperand = expression.substr(0, operatorPos);
+	args.operationSymbol = expression[operatorPos];
+	args.secondOperand = expression.substr(operatorPos + 1);
+}
+
+Controller::Arguments Controller::ParseArguments(const std::string& input)
+{
+	Arguments args{ "", ' ', "", "" };
+
+	if (input.empty())
+		return args;
+
+	std::string trimmedInput = TrimLeft(input);
+	if (trimmedInput.empty())
+		return args;
+
+	std::istringstream stream(trimmedInput);
+
+	if (!ReadIdentifier(stream, args.identifierName))
+		return args;
+
+	std::string expression = ExtractExpression(stream, args.identifierName);
+	if (expression.empty())
+		return args;
+
+	RemoveSpaces(expression);
+	if (expression.empty())
+		return args;
+
+	ParseExpression(expression, args);
+
+	return args;
 }
