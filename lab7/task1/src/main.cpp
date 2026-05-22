@@ -1,55 +1,45 @@
-#include "sort2_tests.h"
-
+#include "FindMax.h"
 #include <iostream>
 #include <string>
+#include <vector>
+
+#include "FindMax.h"
+#include "FindMaxEx.h"
+#include "Sportsmen.h"
+#include <iostream>
+#include <vector>
 
 int main()
 {
+	std::vector<Sportsmen> Sportsmens = {
+		Sportsmen("Иван Иванов", 180, 75),
+		Sportsmen("Петр Петров", 195, 82),
+		Sportsmen("Сидор Сидоров", 175, 92),
+		Sportsmen("Алексей Алексеев", 185, 70),
+		Sportsmen("Дмитрий Дмитриев", 190, 88)
+	};
+    
+	std::cout << "Список спортсменов:\n";
+	for (const auto& a : Sportsmens)
 	{
-		std::cout << "Enter two doubles: ";
-		double first, second;
-
-		std::cin >> first >> second;
-		Sort2(first, second);
-		std::cout << first << "<" << second << std::endl;
+		std::cout << "  " << a << std::endl;
 	}
-
+	std::cout << std::endl;
+    
+	Sportsmen tallest;
+	if (FindMaxEx(Sportsmens, tallest, CompareByHeight()))
 	{
-		std::cout << "Enter two strings: ";
-		std::string s1, s2;
-
-		std::getline(std::cin, s1);
-		std::getline(std::cin, s2);
-
-		Sort2(s1, s2);
-		std::cout << s1 << "<" << s2 << std::endl;
+		std::cout << "Спортсмен с максимальным ростом:\n  " << tallest << std::endl;
 	}
-
+    
+	std::cout << std::endl;
+    
+	Sportsmen heaviest;
+	if (FindMaxEx(Sportsmens, heaviest, CompareByWeight()))
 	{
-		std::cout << "Enter two c_strings: ";
-		std::string s1, s2;
-
-		std::getline(std::cin, s1);
-		std::getline(std::cin, s2);
-
-		const char* p1 = s1.c_str();
-		const char* p2 = s2.c_str();
-
-		Sort2(p1, p2);
-		std::cout << p1 << "<" << p2 << std::endl;
+		std::cout << "Спортсмен с максимальным весом:\n  " << heaviest << std::endl;
 	}
-
-	{
-		std::cout << "Enter three numbers: ";
-		int first, second, third;
-
-		std::cin >> first >> second >> third;
-		Sort2(first, second);
-		Sort2(first, third);
-
-		std::cout << first << "<";
-
-		Sort2(second, third);
-		std::cout << second << "<" << third << std::endl;
-	}
+    
+	std::cout << std::endl;
+	return 0;
 }
