@@ -1,17 +1,11 @@
-#pragma once
+#include "solve4.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
 const double EPS = 1e-9;
 
-struct EquationRoot4
-{
-	int numRoots;
-	double roots[4];
-};
-
-static inline void Solve2(double a, double b, double c, double buf[], int& counter)
+void Solve2(double a, double b, double c, double buf[], int& counter)
 {
 	if (std::abs(a) < EPS)
 	{
@@ -30,7 +24,7 @@ static inline void Solve2(double a, double b, double c, double buf[], int& count
 		buf[counter++] = (-b + sq) / (2.0 * a);
 }
 
-static inline int Solve3(double p, double q, double roots[3])
+int Solve3(double p, double q, double roots[3])
 {
 	double D = q * q / 4.0 + p * p * p / 27.0;
 
@@ -66,7 +60,7 @@ static inline int Solve3(double p, double q, double roots[3])
  * @throws std::invalid_argument  если a == 0
  * @throws std::domain_error      если вещественных корней нет
  */
-inline EquationRoot4 Solve4(double a, double b, double c, double d, double e)
+EquationRoot4 Solve4(double a, double b, double c, double d, double e)
 {
 	if (std::abs(a) < EPS)
 		throw std::invalid_argument("Coefficient a must not be zero for a degree-4 equation");

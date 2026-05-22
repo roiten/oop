@@ -1,8 +1,10 @@
 project(solve4)
 
-add_executable(solve4 main.cpp)
+add_library(solve4_lib STATIC solve4/solve4.cpp)
 
-add_library(solve4_lib INTERFACE)
-target_include_directories(solve4_lib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(solve4_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(solve4 main.cpp)
+target_link_libraries(solve4 solve4_lib)
 
 add_subdirectory(tests)

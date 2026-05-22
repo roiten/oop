@@ -1,9 +1,9 @@
+#include "../solve4/solve4.h"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <cmath>
 #include <stdexcept>
-#include "solve4.h"
 
 using namespace Catch::Matchers;
 
@@ -27,6 +27,176 @@ static bool RootsEqual(const auto& r, const std::vector<double>& expected)
 static void RequireRootValid(double a, double b, double c, double d, double e, double x, double eps = 1e-6)
 {
     REQUIRE_THAT(Eval4(a, b, c, d, e, x), WithinAbs(0.0, eps));
+}
+
+// Tests for Solve2 (quadratic equation solver)
+TEST_CASE("Solve2 handles quadratic equation with two distinct roots")
+{
+    GIVEN("Quadratic equation x^2 - 5x + 6 = 0 (roots 2 and 3)")
+    {
+        double buf[2];
+        int counter = 0;
+
+        WHEN("Solve2 is called")
+        {
+            Solve2(1.0, -5.0, 6.0, buf, counter);
+
+            THEN("It finds 2 roots")
+            {
+                REQUIRE(counter == 2);
+            }
+
+            THEN("Roots are 2 and 3")
+            {
+                REQUIRE_THAT(buf[0], WithinAbs(2.0, 1e-6));
+                REQUIRE_THAT(buf[1], WithinAbs(3.0, 1e-6));
+            }
+        }
+    }
+}
+
+TEST_CASE("Solve2 handles quadratic equation with one double root")
+{
+    GIVEN("Quadratic equation x^2 - 4x + 4 = 0 (double root at 2)")
+    {
+        double buf[2];
+        int counter = 0;
+
+        WHEN("Solve2 is called")
+        {
+            Solve2(1.0, -4.0, 4.0, buf, counter);
+
+            THEN("It finds 1 root")
+            {
+                REQUIRE(counter == 1);
+            }
+
+            THEN("Root is 2")
+            {
+                REQUIRE_THAT(buf[0], WithinAbs(2.0, 1e-6));
+            }
+        }
+    }
+}
+
+TEST_CASE("Solve2 handles linear equation when a is near zero")
+{
+    GIVEN("Equation 2x + 3 = 0 (a ~ 0, linear case)")
+    {
+        double buf[2];
+        int counter = 0;
+
+        WHEN("Solve2 is called with a near zero")
+        {
+            Solve2(1e-10, 2.0, 3.0, buf, counter);
+
+            THEN("It finds 1 root from linear equation")
+            {
+                REQUIRE(counter == 1);
+                REQUIRE_THAT(buf[0], WithinAbs(-1.5, 1e-6));
+            }
+        }
+    }
+}
+
+TEST_CASE("Solve2 handles quadratic with no real roots")
+{
+    GIVEN("Quadratic equation x^2 + 1 = 0 (no real roots)")
+    {
+        double buf[2];
+        int counter = 0;
+
+        WHEN("Solve2 is called")
+        {
+            Solve2(1.0, 0.0, 1.0, buf, counter);
+
+            THEN("It finds 0 roots")
+            {
+                REQUIRE(counter == 0);
+            }
+        }
+    }
+}
+
+TEST_CASE("Solve3 with one real root")
+{
+    GIVEN("Cubic t^3 + t + 1 = 0 (p=1, q=1)")
+    {
+        double roots[3];
+
+        WHEN("Solve3 is called")
+        {
+            int numRoots = Solve3(1.0, 1.0, roots);
+
+            THEN("It returns 1 real root")
+            {
+                REQUIRE(numRoots == 1);
+            }
+
+            THEN("The root satisfies the equation approx")
+            {
+                double r = roots[0];
+                REQUIRE_THAT(r*r*r + r + 1.0, WithinAbs(0.0, 1e-6));
+            }
+        }
+    }
+}
+
+TEST_CASE("Solve3 cubic with three real roots")
+{
+    GIVEN("Depressed cubic t^3 - 3t + 1 = 0 (p=-3, q=1)")
+    {
+        double roots[3];
+
+        WHEN("Solve3 is called")
+        {
+            int numRoots = Solve3(-3.0, 1.0, roots);
+
+            THEN("It returns 3 real roots")
+            {
+                REQUIRE(numRoots == 3);
+            }
+
+            THEN("All roots satisfy the equation")
+            {
+                for (int i = 0; i < numRoots; ++i)
+                {
+                    double r = roots[i];
+                    REQUIRE_THAT(r*r*r - 3.0*r + 1.0, WithinAbs(0.0, 1e-6));
+                }
+            }
+
+            THEN("Roots are in ascending order")
+            {
+                REQUIRE(roots[0] <= roots[1]);
+                REQUIRE(roots[1] <= roots[2]);
+            }
+        }
+    }
+}
+
+TEST_CASE("Solve3 cubic with double root")
+{
+    GIVEN("Depressed cubic t^3 - 3t + 2 = 0 (p=-3, q=2)")
+    {
+        double roots[3];
+
+        WHEN("Solve3 is called")
+        {
+            int numRoots = Solve3(-3.0, 2.0, roots);
+
+            THEN("It returns 2 distinct roots (one double)")
+            {
+                REQUIRE(numRoots == 2);
+            }
+
+            THEN("The roots are -2 and 1")
+            {
+                REQUIRE_THAT(roots[0], WithinAbs(-2.0, 1e-6));
+                REQUIRE_THAT(roots[1], WithinAbs(1.0, 1e-6));
+            }
+        }
+    }
 }
 
 TEST_CASE("Solve4 exception when coefficient a is zero")
@@ -356,3 +526,4 @@ TEST_CASE("Solve4 returns roots in ascending order")
         }
     }
 }
+

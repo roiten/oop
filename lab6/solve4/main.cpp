@@ -1,4 +1,4 @@
-#include "solve4.h"
+#include "solve4/solve4.h"
 #include <iostream>
 #include <stdexcept>
 
