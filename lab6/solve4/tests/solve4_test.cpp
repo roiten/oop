@@ -29,7 +29,6 @@ static void RequireRootValid(double a, double b, double c, double d, double e, d
     REQUIRE_THAT(Eval4(a, b, c, d, e, x), WithinAbs(0.0, eps));
 }
 
-// Tests for Solve2 (quadratic equation solver)
 TEST_CASE("Solve2 handles quadratic equation with two distinct roots")
 {
     GIVEN("Quadratic equation x^2 - 5x + 6 = 0 (roots 2 and 3)")
@@ -126,7 +125,7 @@ TEST_CASE("Solve3 with one real root")
 
         WHEN("Solve3 is called")
         {
-            int numRoots = Solve3(1.0, 1.0, roots);
+            int numRoots = SolveDepressed3(1.0, 1.0, roots);
 
             THEN("It returns 1 real root")
             {
@@ -150,7 +149,7 @@ TEST_CASE("Solve3 cubic with three real roots")
 
         WHEN("Solve3 is called")
         {
-            int numRoots = Solve3(-3.0, 1.0, roots);
+            int numRoots = SolveDepressed3(-3.0, 1.0, roots);
 
             THEN("It returns 3 real roots")
             {
@@ -183,7 +182,7 @@ TEST_CASE("Solve3 cubic with double root")
 
         WHEN("Solve3 is called")
         {
-            int numRoots = Solve3(-3.0, 2.0, roots);
+            int numRoots = SolveDepressed3(-3.0, 2.0, roots);
 
             THEN("It returns 2 distinct roots (one double)")
             {
@@ -256,10 +255,6 @@ TEST_CASE("Solve4 finds four distinct roots")
             
             THEN("Roots are 1, 2, 3, 4")
             {
-                // REQUIRE_THAT(r.roots[0], WithinAbs(1.0, 1e-6));
-                // REQUIRE_THAT(r.roots[1], WithinAbs(2.0, 1e-6));
-                // REQUIRE_THAT(r.roots[2], WithinAbs(3.0, 1e-6));
-                // REQUIRE_THAT(r.roots[3], WithinAbs(4.0, 1e-6));
             	REQUIRE(RootsEqual(r, std::vector<double>{1, 2, 3, 4}));
             }
             
