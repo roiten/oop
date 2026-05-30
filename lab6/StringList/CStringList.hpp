@@ -45,7 +45,7 @@ public:
 		using pointer = std::conditional_t<IsConst, const std::string*, std::string*>;
 
 		CIterator() = default;
-		operator CIterator<true>() const { return CIterator<true>(m_node, m_end); }
+		operator CIterator<true>() const { return {m_node, m_end}; }
 
 		reference operator*() const
 		{
@@ -181,7 +181,7 @@ public:
 	size_t GetSize() const { return m_size; }
 	bool IsEmpty() const { return m_size == 0; }
 
-	CIterator<false> Emplace(CIterator<true> pos, std::string const& data)
+	CIterator<false> Emplace(CIterator<true> pos, std::string data)
 	{
 		BaseNode* curr = pos.m_node;
 		auto newNode = std::make_unique<Node>(data);
@@ -218,7 +218,10 @@ public:
 	}
 
 	CIterator<false> PushFront(std::string const& data) { return Emplace(cbegin(), data); }
+	CIterator<false> PushFront(std::string && data) { return Emplace(cbegin(), std::move(data)); }
+
 	CIterator<false> PushBack(std::string const& data) { return Emplace(cend(), data); }
+	CIterator<false> PushBack(std::string&& data) { return Emplace(cend(), std::move(data)); }
 
 	void PopFront()
 	{

@@ -2,14 +2,14 @@
 #include <string>
 #include "../CStringList.hpp"
 
-TEST_CASE("Default constructor creates empty list", "[constructor]")
+TEST_CASE("Default constructor creates empty list")
 {
     CStringList list;
     CHECK(list.IsEmpty());
     CHECK(list.GetSize() == 0);
 }
 
-TEST_CASE("Copy constructor produces independent deep copy", "[constructor]")
+TEST_CASE("Copy constructor produces independent deep copy")
 {
     CStringList original;
     original.PushBack("hello");
@@ -25,7 +25,7 @@ TEST_CASE("Copy constructor produces independent deep copy", "[constructor]")
     CHECK(original.GetFrontElement() == "hello");
 }
 
-TEST_CASE("Move constructor transfers ownership and empties source", "[constructor]")
+TEST_CASE("Move constructor transfers ownership and empties source")
 {
     CStringList source;
     source.PushBack("move_me");
@@ -37,7 +37,7 @@ TEST_CASE("Move constructor transfers ownership and empties source", "[construct
     CHECK(source.IsEmpty());
 }
 
-TEST_CASE("Copy assignment operator", "[constructor]")
+TEST_CASE("Copy assignment operator")
 {
     CStringList list1;
     list1.PushBack("A");
@@ -53,7 +53,7 @@ TEST_CASE("Copy assignment operator", "[constructor]")
     CHECK(list1.GetFrontElement() == "B");
 }
 
-TEST_CASE("Move assignment operator", "[constructor]")
+TEST_CASE("Move assignment operator")
 {
     CStringList list1;
 

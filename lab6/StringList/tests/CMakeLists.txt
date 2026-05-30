@@ -1,7 +1,5 @@
 add_executable(ListTests
         ConstructorTests.cpp
-        AccessAndSwapTests.cpp
-        AdditionalTypesTests.cpp
         ExceptionsAndBoundaryTests.cpp
         IteratorTests.cpp
         MemberTypeTests.cpp

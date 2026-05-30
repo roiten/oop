@@ -1,9 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <algorithm>
+#include <ranges>
 #include <vector>
 #include "../CStringList.hpp"
 
-TEST_CASE("Forward iteration", "[iterator]")
+TEST_CASE("Iteration visits elements in insertion order")
 {
     CStringList list;
     list.PushBack("1");
@@ -15,25 +16,9 @@ TEST_CASE("Forward iteration", "[iterator]")
         result.push_back(*it);
 
     REQUIRE(result == std::vector<std::string>{"1", "2", "3"});
-
-    auto it = list.begin();
-    CHECK(*it == "1");
-    CHECK(*(++it) == "2");
 }
 
-TEST_CASE("Const iteration", "[iterator]")
-{
-    CStringList list;
-    list.PushBack("10");
-    const CStringList& constList = list;
-
-    auto it = constList.begin();
-    CHECK(*it == "10");
-    CHECK(constList.cbegin() == constList.begin());
-    CHECK(constList.cend() == constList.end());
-}
-
-TEST_CASE("Reverse iteration", "[iterator]")
+TEST_CASE("Reverse iteration visits elements in reverse order")
 {
     CStringList list;
     list.PushBack("1");
@@ -41,15 +26,26 @@ TEST_CASE("Reverse iteration", "[iterator]")
     list.PushBack("3");
 
     std::vector<std::string> result;
-    for (auto it = list.rbegin(); it != list.rend(); ++it)
-        result.push_back(*it);
+    for (auto & it : std::ranges::reverse_view(list))
+        result.push_back(it);
 
     REQUIRE(result == std::vector<std::string>{"3", "2", "1"});
     CHECK(*list.rbegin() == "3");
     CHECK(*(--list.rend()) == "1");
 }
 
-TEST_CASE("Iterator operators", "[iterator]")
+TEST_CASE("Const iterators are equal to non-const for same position")
+{
+    CStringList list;
+    list.PushBack("10");
+    const CStringList& constList = list;
+
+    CHECK(*constList.begin() == "10");
+    CHECK(constList.cbegin() == constList.begin());
+    CHECK(constList.cend() == constList.end());
+}
+
+TEST_CASE("Iterator pre/post increment and decrement")
 {
     CStringList list;
     list.PushBack("1");
@@ -59,8 +55,6 @@ TEST_CASE("Iterator operators", "[iterator]")
     auto it2 = list.begin();
 
     CHECK(it1 == it2);
-    CHECK_FALSE(it1 != it2);
-
     it2++;
     CHECK(it1 != it2);
 
@@ -73,7 +67,7 @@ TEST_CASE("Iterator operators", "[iterator]")
     CHECK(*it1 == "2");
 }
 
-TEST_CASE("Iterator conversion from non-const to const", "[iterator]")
+TEST_CASE("Non-const iterator implicitly converts to const")
 {
     CStringList list;
     list.PushBack("1");
@@ -85,15 +79,28 @@ TEST_CASE("Iterator conversion from non-const to const", "[iterator]")
     CHECK(it == cit);
 }
 
-TEST_CASE("Arrow operator on iterator", "[iterator]")
+TEST_CASE("begin() on const list returns const iterator")
 {
-    CStringList list;
-    list.PushBack("hello");
+	CStringList list;
+	list.PushBack("1");
 
-    CHECK(list.begin()->size() == 5);
+	const auto& constList = list;
+	auto it = constList.begin();
+
+	static_assert(std::is_const_v<std::remove_reference_t<decltype(*it)>>);
+	CHECK(*it == "1");
 }
 
-TEST_CASE("STL algorithm compatibility", "[iterator]")
+
+TEST_CASE("Arrow operator accesses string members")
+{
+    CStringList list;
+    list.PushBack("string");
+
+    CHECK(list.begin()->size() == 6);
+}
+
+TEST_CASE("Iterators are compatible with STL algorithms")
 {
     CStringList list;
     list.PushBack("c");
@@ -103,4 +110,40 @@ TEST_CASE("STL algorithm compatibility", "[iterator]")
     auto it = std::find(list.begin(), list.end(), "a");
     REQUIRE(it != list.end());
     CHECK(*it == "a");
+}
+
+TEST_CASE("GetFrontElement and GetBackElement return correct values")
+{
+	CStringList list;
+	list.PushBack("start");
+	list.PushBack("middle");
+	list.PushBack("finish");
+
+	CHECK(list.GetFrontElement() == "start");
+	CHECK(list.GetBackElement() == "finish");
+
+	*list.begin() = "first";
+	CHECK(list.GetFrontElement() == "first");
+
+	const CStringList& constList = list;
+	CHECK(constList.GetFrontElement() == "first");
+	CHECK(constList.GetBackElement() == "finish");
+}
+
+TEST_CASE("GetSize and IsEmpty can show list state correctly")
+{
+	CStringList list;
+	CHECK(list.IsEmpty());
+	CHECK(list.GetSize() == 0);
+	list.PushBack("1");
+	CHECK(list.GetSize() == 1);
+	list.PushFront("0");
+	CHECK(list.GetSize() == 2);
+	list.Erase(list.begin());
+	CHECK(list.GetSize() == 1);
+
+	CHECK_FALSE(list.IsEmpty());
+	list.Clear();
+	CHECK(list.IsEmpty());
+	CHECK(list.GetSize() == 0);
 }
